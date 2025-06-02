@@ -47,29 +47,6 @@
           />
         </el-form-item>
       </el-col>
-      <el-col
-        :span="24"
-        style="padding-right: 10px; padding-left: 10px; margin-top: -20px; margin-bottom: -20px"
-      >
-        <el-form-item>
-          <el-row justify="space-between" style="width: 100%">
-            <el-col :span="6">
-              <el-checkbox v-model="loginData.loginForm.rememberMe">
-                {{ t('login.remember') }}
-              </el-checkbox>
-            </el-col>
-            <el-col :offset="6" :span="12">
-              <el-link
-                style="float: right"
-                type="primary"
-                @click="setLoginState(LoginStateEnum.RESET_PASSWORD)"
-              >
-                {{ t('login.forgetPassword') }}
-              </el-link>
-            </el-col>
-          </el-row>
-        </el-form-item>
-      </el-col>
       <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <XButton
@@ -89,49 +66,6 @@
         mode="pop"
         @success="handleLogin"
       />
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
-        <el-form-item>
-          <el-row :gutter="5" justify="space-between" style="width: 100%">
-            <el-col :span="8">
-              <XButton
-                :title="t('login.btnMobile')"
-                class="w-[100%]"
-                @click="setLoginState(LoginStateEnum.MOBILE)"
-              />
-            </el-col>
-            <el-col :span="8">
-              <XButton
-                :title="t('login.btnQRCode')"
-                class="w-[100%]"
-                @click="setLoginState(LoginStateEnum.QR_CODE)"
-              />
-            </el-col>
-            <el-col :span="8">
-              <XButton
-                :title="t('login.btnRegister')"
-                class="w-[100%]"
-                @click="setLoginState(LoginStateEnum.REGISTER)"
-              />
-            </el-col>
-          </el-row>
-        </el-form-item>
-      </el-col>
-      <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
-        <el-form-item>
-          <div class="w-[100%] flex justify-between">
-            <Icon
-              v-for="(item, key) in socialList"
-              :key="key"
-              :icon="item.icon"
-              :size="30"
-              class="anticon cursor-pointer"
-              color="#999"
-              @click="doSocialLogin(item.type)"
-            />
-          </div>
-        </el-form-item>
-      </el-col>
     </el-row>
   </el-form>
 </template>
@@ -180,16 +114,9 @@ const loginData = reactive({
     username: import.meta.env.VITE_APP_DEFAULT_LOGIN_USERNAME || '',
     password: import.meta.env.VITE_APP_DEFAULT_LOGIN_PASSWORD || '',
     captchaVerification: '',
-    rememberMe: true // 默认记录我。如果不需要，可手动修改
+    rememberMe: false
   }
 })
-
-const socialList = [
-  { icon: 'ant-design:wechat-filled', type: 30 },
-  { icon: 'ant-design:dingtalk-circle-filled', type: 20 },
-  { icon: 'ant-design:github-filled', type: 0 },
-  { icon: 'ant-design:alipay-circle-filled', type: 0 }
-]
 
 // 获取验证码
 const getCode = async () => {
