@@ -12,42 +12,6 @@
                 <div class="text-20px">
                   {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }}
                 </div>
-                <div class="mt-10px text-14px text-gray-500">
-                  {{ t('workplace.toady') }}，20℃ - 32℃！
-                </div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
-            <div class="h-70px flex items-center justify-end lt-sm:mt-10px">
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.project') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.project"
-                  :duration="2600"
-                />
-              </div>
-              <el-divider direction="vertical" />
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.todo"
-                  :duration="2600"
-                />
-              </div>
-              <el-divider direction="vertical" border-style="dashed" />
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.access') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.access"
-                  :duration="2600"
-                />
               </div>
             </div>
           </el-col>
@@ -57,150 +21,199 @@
   </div>
 
   <el-row class="mt-8px" :gutter="8" justify="space-between">
-    <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-8px">
+    <el-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24" class="mb-8px">
+
       <el-card shadow="never">
         <template #header>
-          <div class="h-3 flex justify-between">
-            <span>{{ t('workplace.project') }}</span>
-            <el-link
-              type="primary"
-              :underline="false"
-              href="https://github.com/yudaocode"
-              target="_blank"
-            >
-              {{ t('action.more') }}
+          <div class="h-3 flex justify-between items-center">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-primary" :size="20"><Menu /></el-icon>
+              <span class="text-lg font-medium">快捷入口</span>
+            </div>
+          </div>
+        </template>
+        <el-skeleton :loading="loading" animated>
+          <el-row :gutter="16">
+            <el-col v-for="item in shortcut" :key="item.name" :span="6" class="mb-16px">
+              <div class="flex items-center justify-center cursor-pointer" @click="handleShortcutClick(item.url)">
+                <el-card shadow="hover" class="w-90% text-center py-16px">
+                  <Icon :icon="item.icon" :size="30" class="mb-8px" :style="{ color: item.color }" />
+                  <div>{{ item.name }}</div>
+                </el-card>
+              </div>
+            </el-col>
+          </el-row>
+        </el-skeleton>
+      </el-card>
+      
+      <el-card shadow="never" class="mt-8px">
+        <template #header>
+          <div class="h-3 flex justify-between items-center">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-warning" :size="20"><Bell /></el-icon>
+              <span class="text-lg font-medium">通知公告</span>
+            </div>
+            <el-link type="primary" :underline="false" @click="handleViewMore">
+              查看更多
             </el-link>
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
-          <el-row>
-            <el-col
-              v-for="(item, index) in projects"
-              :key="`card-${index}`"
-              :xl="8"
-              :lg="8"
-              :md="8"
-              :sm="24"
-              :xs="24"
-            >
-              <el-card
-                shadow="hover"
-                class="mr-5px mt-5px cursor-pointer"
-                @click="handleProjectClick(item.message)"
-              >
-                <div class="flex items-center">
-                  <Icon
-                    :icon="item.icon"
-                    :size="25"
-                    class="mr-8px"
-                    :style="{ color: item.color }"
-                  />
-                  <span class="text-16px">{{ item.name }}</span>
-                </div>
-                <div class="mt-12px text-12px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-12px flex justify-between text-12px text-gray-400">
-                  <span>{{ item.personal }}</span>
-                  <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
+          <div v-if="notice && notice.length > 0">
+            <div v-for="item in notice" :key="item.id" class="mb-16px">
+              <div class="flex items-center">
+                <el-tag :type="item.type === 1 ? 'warning' : 'success'" class="mr-8px">
+                  {{ item.type === 1 ? '通知' : '公告' }}
+                </el-tag>
+                <el-link :underline="false" @click="showNoticeDetail(item.id)">{{ item.title }}</el-link>
+              </div>
+              <div class="mt-8px text-gray-400 text-sm">
+                {{ formatDate(item.createTime) }}
+              </div>
+              <el-divider v-if="notice.indexOf(item) !== notice.length - 1" />
+            </div>
+          </div>
+          <el-empty v-else description="暂无通知公告" />
         </el-skeleton>
       </el-card>
 
       <el-card shadow="never" class="mt-8px">
-        <el-skeleton :loading="loading" animated>
-          <el-row :gutter="20" justify="space-between">
-            <el-col :xl="10" :lg="10" :md="24" :sm="24" :xs="24">
-              <el-card shadow="hover" class="mb-8px">
-                <el-skeleton :loading="loading" animated>
-                  <Echart :options="pieOptionsData" :height="280" />
-                </el-skeleton>
-              </el-card>
-            </el-col>
-            <el-col :xl="14" :lg="14" :md="24" :sm="24" :xs="24">
-              <el-card shadow="hover" class="mb-8px">
-                <el-skeleton :loading="loading" animated>
-                  <Echart :options="barOptionsData" :height="280" />
-                </el-skeleton>
-              </el-card>
-            </el-col>
-          </el-row>
-        </el-skeleton>
-      </el-card>
-    </el-col>
-    <el-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-8px">
-      <el-card shadow="never">
         <template #header>
-          <div class="h-3 flex justify-between">
-            <span>{{ t('workplace.shortcutOperation') }}</span>
+          <div class="h-3 flex justify-between items-center">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-success" :size="20"><Tickets /></el-icon>
+              <span class="text-lg font-medium">我的流程（审批中）</span>
+            </div>
+            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">
+              查看更多
+            </el-link>
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
-          <el-row>
-            <el-col v-for="item in shortcut" :key="`team-${item.name}`" :span="8" class="mb-8px">
-              <div class="flex items-center">
-                <Icon :icon="item.icon" class="mr-8px" :style="{ color: item.color }" />
-                <el-link type="default" :underline="false" @click="handleShortcutClick(item.url)">
-                  {{ item.name }}
-                </el-link>
-              </div>
-            </el-col>
-          </el-row>
+          <div v-if="myProcesses && myProcesses.length > 0">
+            <el-table :data="myProcesses" stripe>
+              <el-table-column prop="name" label="流程名称" show-overflow-tooltip />
+              <el-table-column prop="status" label="状态">
+                <template #default="{ row }">
+                  <el-tag :type="row.status === 1 ? 'warning' : 'success'">
+                    {{ row.status === 1 ? '处理中' : '已完成' }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createTime" label="发起时间" width="180" :formatter="(row) => formatDate(row.startTime)" />
+            </el-table>
+          </div>
+          <el-empty v-else description="暂无流程" />
         </el-skeleton>
       </el-card>
+
       <el-card shadow="never" class="mt-8px">
         <template #header>
-          <div class="h-3 flex justify-between">
-            <span>{{ t('workplace.notice') }}</span>
-            <el-link type="primary" :underline="false">{{ t('action.more') }}</el-link>
+          <div class="h-3 flex justify-between items-center">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-danger" :size="20"><Document /></el-icon>
+              <span class="text-lg font-medium">待办任务</span>
+            </div>
+            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
+              查看更多
+            </el-link>
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
-          <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
-            <div class="flex items-center">
-              <el-avatar :src="avatar" :size="35" class="mr-16px">
-                <img src="@/assets/imgs/avatar.gif" alt="" />
-              </el-avatar>
-              <div>
-                <div class="text-14px">
-                  <Highlight :keys="item.keys.map((v) => t(v))">
-                    {{ item.type }} : {{ item.title }}
-                  </Highlight>
-                </div>
-                <div class="mt-16px text-12px text-gray-400">
-                  {{ formatTime(item.date, 'yyyy-MM-dd') }}
-                </div>
-              </div>
-            </div>
-            <el-divider />
+          <div v-if="todoTasks && todoTasks.length > 0">
+            <el-table :data="todoTasks" stripe>
+              <el-table-column prop="processInstance.name" label="流程" show-overflow-tooltip />
+              <el-table-column prop="name" label="任务名称" show-overflow-tooltip />
+              <el-table-column prop="createTime" label="创建时间" width="180" :formatter="(row) => formatDate(row.createTime)" />
+            </el-table>
           </div>
+          <el-empty v-else description="暂无待办任务" />
         </el-skeleton>
       </el-card>
     </el-col>
   </el-row>
+
+  <el-dialog v-model="noticeDetailVisible" :title="selectedNotice?.title" width="600px">
+    <div v-loading="noticeDetailLoading">
+      <div v-if="selectedNotice">
+        <div class="mb-16px">
+          <el-tag :type="selectedNotice.type === 1 ? 'warning' : 'success'" class="mr-8px">
+            {{ selectedNotice.type === 1 ? '通知' : '公告' }}
+          </el-tag>
+          <span class="text-gray-400 text-sm">{{ formatDate(selectedNotice.createTime) }}</span>
+        </div>
+        <div v-html="selectedNotice.content"></div>
+      </div>
+    </div>
+  </el-dialog>
+
+  <!-- 通知公告列表弹窗 -->
+  <el-dialog v-model="noticeListVisible" title="通知公告" width="800">
+    <el-table v-loading="noticeListLoading" :data="noticeList" stripe>
+      <el-table-column prop="title" label="标题" show-overflow-tooltip />
+      <el-table-column prop="type" label="类型" width="100">
+        <template #default="{ row }">
+          <el-tag :type="row.type === 1 ? 'warning' : 'success'">
+            {{ row.type === 1 ? '通知' : '公告' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="100">
+        <template #default="{ row }">
+          <el-tag :type="row.status === 0 ? 'success' : 'info'">
+            {{ row.status === 0 ? '正常' : '关闭' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="createTime" label="创建时间" width="180" :formatter="(row) => formatDate(row.createTime)" />
+      <el-table-column label="操作" width="100" fixed="right">
+        <template #default="{ row }">
+          <el-button link type="primary" @click="showNoticeDetail(row.id)">查看</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div class="flex justify-end mt-10px">
+      <el-pagination
+        v-model:current-page="queryParams.pageNo"
+        v-model:page-size="queryParams.pageSize"
+        :total="total"
+        :page-sizes="[10, 20, 30, 50]"
+        size="small"
+        background
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="getNoticeList"
+        @current-change="getNoticeList"
+      />
+    </div>
+  </el-dialog>
 </template>
 <script lang="ts" setup>
+import { ref, onMounted, reactive } from 'vue'
 import { set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
-import { formatTime } from '@/utils'
-
+import { formatDate } from '@/utils/formatTime'
+import { useI18n } from '@/hooks/web/useI18n'
 import { useUserStore } from '@/store/modules/user'
-// import { useWatermark } from '@/hooks/web/useWatermark'
-import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
-import { pieOptions, barOptions } from './echarts-data'
 import { useRouter } from 'vue-router'
+import * as NoticeApi from '@/api/system/notice'
+import * as ProcessApi from '@/api/bpm/processInstance'
+import * as TaskApi from '@/api/bpm/task'
+import type { NoticeVO } from '@/api/system/notice'
+import type { ProcessInstanceVO } from '@/api/bpm/processInstance'
+import type { TaskVO } from '@/api/bpm/task'
+import { pieOptions, barOptions } from './echarts-data'
+import { Menu, Bell, Tickets, Document } from '@element-plus/icons-vue'
 
 defineOptions({ name: 'Index' })
 
 const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
-// const { setWatermark } = useWatermark()
 const loading = ref(true)
 const avatar = userStore.getUser.avatar
 const username = userStore.getUser.nickname
 const pieOptionsData = reactive<EChartsOption>(pieOptions) as EChartsOption
+
 // 获取统计数
 let totalSate = reactive<WorkplaceTotal>({
   project: 0,
@@ -273,82 +286,79 @@ const getProject = async () => {
   projects = Object.assign(projects, data)
 }
 
+// 通知公告相关
+const notice = ref<NoticeVO[]>([])
+const noticeDetailVisible = ref(false)
+const selectedNotice = ref<NoticeVO>()
+const noticeDetailLoading = ref(false)
+
+// 我的流程
+const myProcesses = ref<ProcessInstanceVO[]>([])
+
+// 待办任务
+const todoTasks = ref<TaskVO[]>([])
+
+// 通知公告列表相关
+const noticeListVisible = ref(false)
+const noticeListLoading = ref(false)
+const noticeList = ref<NoticeVO[]>([])
+const total = ref(0)
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  status: 0 // 已发布的通知
+})
+
 // 获取通知公告
-let notice = reactive<Notice[]>([])
-const getNotice = async () => {
-  const data = [
-    {
-      title: '系统支持 JDK 8/17/21，Vue 2/3',
-      type: '技术兼容性',
-      keys: ['JDK', 'Vue'],
-      date: new Date()
-    },
-    {
-      title: '后端提供 Spring Boot 2.7/3.2 + Cloud 双架构',
-      type: '架构灵活性',
-      keys: ['Boot', 'Cloud'],
-      date: new Date()
-    },
-    {
-      title: '全部开源，个人与企业可 100% 直接使用，无需授权',
-      type: '开源免授权',
-      keys: ['无需授权'],
-      date: new Date()
-    },
-    {
-      title: '国内使用最广泛的快速开发平台，远超 10w+ 企业使用',
-      type: '广泛企业认可',
-      keys: ['最广泛', '10w+'],
-      date: new Date()
+const getNotices = async () => {
+  console.log('开始获取通知公告')
+  try {
+    const res = await NoticeApi.getNoticePage({
+      pageNo: 1,
+      pageSize: 5,
+      status: 0 // 已发布的通知
+    })
+    console.log('通知公告API响应:', res)
+    if (res.list) {
+      notice.value = res.list
+      console.log('通知公告数据已更新:', notice.value)
+    } else {
+      console.warn('通知公告API返回异常:', res)
+      notice.value = []
     }
-  ]
-  notice = Object.assign(notice, data)
+  } catch (error) {
+    console.error('获取通知公告失败:', error)
+    notice.value = []
+  }
 }
 
 // 获取快捷入口
-let shortcut = reactive<Shortcut[]>([])
-
-const getShortcut = async () => {
-  const data = [
-    {
-      name: '首页',
-      icon: 'ion:home-outline',
-      url: '/',
-      color: '#1fdaca'
-    },
-    {
-      name: '商城中心',
-      icon: 'ep:shop',
-      url: '/mall/home',
-      color: '#ff6b6b'
-    },
-    {
-      name: 'AI 大模型',
-      icon: 'tabler:ai',
-      url: '/ai/chat',
-      color: '#7c3aed'
-    },
-    {
-      name: 'ERP 系统',
-      icon: 'simple-icons:erpnext',
-      url: '/erp/home',
-      color: '#3fb27f'
-    },
-    {
-      name: 'CRM 系统',
-      icon: 'simple-icons:civicrm',
-      url: '/crm/backlog',
-      color: '#4daf1bc9'
-    },
-    {
-      name: 'IoT 物联网',
-      icon: 'fa-solid:hdd',
-      url: '/iot/home',
-      color: '#1a73e8'
-    }
-  ]
-  shortcut = Object.assign(shortcut, data)
-}
+const shortcut = ref([
+  {
+    name: '发起流程',
+    icon: 'ep:plus',
+    url: '/bpm/task/create',
+    color: '#1fdaca'
+  },
+  {
+    name: '待办任务',
+    icon: 'ep:document',
+    url: '/bpm/task/my',
+    color: '#ff6b6b'
+  },
+  {
+    name: '我的流程',
+    icon: 'ep:tickets',
+    url: '/bpm/task/todo',
+    color: '#7c3aed'
+  },
+  {
+    name: '已办流程',
+    icon: 'ep:document-checked',
+    url: '/bpm/task/done',
+    color: '#3fb27f'
+  }
+])
 
 // 用户来源
 const getUserAccessSource = async () => {
@@ -398,16 +408,98 @@ const getWeeklyUserActivity = async () => {
   ])
 }
 
+// 获取我的流程
+const getMyProcesses = async () => {
+  console.log('开始获取我的流程')
+  try {
+    const res = await ProcessApi.getProcessInstanceMyPage({
+      pageNo: 1,
+      pageSize: 5,
+      status: 1 // 审批中的流程
+    })
+    console.log('我的流程API响应:', res)
+    if (res.list) {
+      myProcesses.value = res.list
+      console.log('我的流程数据已更新:', myProcesses.value)
+    } else {
+      console.warn('我的流程API返回异常:', res)
+      myProcesses.value = []
+    }
+  } catch (error) {
+    console.error('获取我的流程失败:', error)
+    myProcesses.value = []
+  }
+}
+
+// 获取待办任务
+const getTodoTasks = async () => {
+  console.log('开始获取待办任务')
+  try {
+    const res = await TaskApi.getTaskTodoPage({
+      pageNo: 1,
+      pageSize: 5
+    })
+    console.log('待办任务API响应:', res)
+    if (res.list) {
+      todoTasks.value = res.list
+      console.log('待办任务数据已更新:', todoTasks.value)
+    } else {
+      console.warn('待办任务API返回异常:', res)
+      todoTasks.value = []
+    }
+  } catch (error) {
+    console.error('获取待办任务失败:', error)
+    todoTasks.value = []
+  }
+}
+
+// 显示通知详情
+const showNoticeDetail = async (id: number) => {
+  noticeDetailVisible.value = true
+  noticeDetailLoading.value = true
+  try {
+    const res = await NoticeApi.getNotice(id)
+    console.log('通知详情API响应:', res)
+    if (res) {
+      selectedNotice.value = {
+        ...res,
+        content: res.content || ''
+      }
+    }
+  } catch (error) {
+    console.error('获取通知详情失败:', error)
+  } finally {
+    noticeDetailLoading.value = false
+  }
+}
+
+// 获取所有数据
 const getAllApi = async () => {
-  await Promise.all([
-    getCount(),
-    getProject(),
-    getNotice(),
-    getShortcut(),
-    getUserAccessSource(),
-    getWeeklyUserActivity()
-  ])
-  loading.value = false
+  console.log('开始初始化数据')
+  loading.value = true
+  try {
+    const results = await Promise.allSettled([
+      getNotices(),
+      getMyProcesses(),
+      getTodoTasks()
+    ])
+    console.log('API调用结果:', results)
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`第${index + 1}个API调用失败:`, result.reason)
+      }
+    })
+  } catch (error) {
+    console.error('获取数据失败:', error)
+  } finally {
+    loading.value = false
+    console.log('当前数据状态:', {
+      notice: notice.value,
+      myProcesses: myProcesses.value,
+      todoTasks: todoTasks.value,
+      loading: loading.value
+    })
+  }
 }
 
 const handleProjectClick = (message: string) => {
@@ -418,5 +510,46 @@ const handleShortcutClick = (url: string) => {
   router.push(url)
 }
 
-getAllApi()
+// 获取通知公告列表
+const getNoticeList = async () => {
+  noticeListLoading.value = true
+  try {
+    const res = await NoticeApi.getNoticePage(queryParams)
+    if (res.list) {
+      noticeList.value = res.list
+      total.value = res.total
+    }
+  } catch (error) {
+    console.error('获取通知列表失败:', error)
+  } finally {
+    noticeListLoading.value = false
+  }
+}
+
+// 修改查看更多的点击事件
+const handleViewMore = () => {
+  noticeListVisible.value = true
+  getNoticeList()
+}
+
+// 初始化
+onMounted(() => {
+  console.log('组件挂载，开始获取数据')
+  getAllApi()
+})
 </script>
+
+<style scoped>
+.text-primary {
+  color: var(--el-color-primary);
+}
+.text-warning {
+  color: var(--el-color-warning);
+}
+.text-success {
+  color: var(--el-color-success);
+}
+.text-danger {
+  color: var(--el-color-danger);
+}
+</style>
