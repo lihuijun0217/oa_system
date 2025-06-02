@@ -22,6 +22,63 @@
 
   <el-row class="mt-8px" :gutter="8" justify="space-between">
     <el-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24" class="mb-8px">
+      <!-- 系统提醒模块 -->
+      <el-card shadow="never" class="mb-8px">
+        <template #header>
+          <div class="h-3 flex justify-between items-center">
+            <div class="flex items-center">
+              <el-icon class="mr-2 text-primary" :size="20"><Bell /></el-icon>
+              <span class="text-lg font-medium">系统提醒</span>
+            </div>
+          </div>
+        </template>
+        <el-skeleton :loading="loading" animated>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
+                 @click="handleShortcutClick('/bpm/task/todo')">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <el-icon class="mr-3 text-danger" :size="24"><Document /></el-icon>
+                  <span class="text-gray-600">待办任务</span>
+                </div>
+                <el-badge :value="todoTasks.length || 0" :max="99" class="notify-badge">
+                  <template #content>
+                    <span class="text-lg">{{ todoTasks.length || 0 }}</span>
+                  </template>
+                </el-badge>
+              </div>
+            </div>
+            <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
+                 @click="handleShortcutClick('/bpm/task/done')">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <el-icon class="mr-3 text-success" :size="24"><Tickets /></el-icon>
+                  <span class="text-gray-600">已办任务</span>
+                </div>
+                <el-badge :value="doneTasks.length || 0" :max="99" type="success" class="notify-badge">
+                  <template #content>
+                    <span class="text-lg">{{ doneTasks.length || 0 }}</span>
+                  </template>
+                </el-badge>
+              </div>
+            </div>
+            <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
+                 @click="handleShortcutClick('/bpm/task/my')">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <el-icon class="mr-3 text-danger" :size="24"><Timer /></el-icon>
+                  <span class="text-gray-600">我的流程</span>
+                </div>
+                <el-badge :value="myProcesses.length || 0" :max="99" class="notify-badge">
+                  <template #content>
+                    <span class="text-lg">{{ myProcesses.length || 0 }}</span>
+                  </template>
+                </el-badge>
+              </div>
+            </div>
+          </div>
+        </el-skeleton>
+      </el-card>
 
       <el-card shadow="never">
         <template #header>
@@ -202,7 +259,7 @@ import type { NoticeVO } from '@/api/system/notice'
 import type { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import type { TaskVO } from '@/api/bpm/task'
 import { pieOptions, barOptions } from './echarts-data'
-import { Menu, Bell, Tickets, Document } from '@element-plus/icons-vue'
+import { Menu, Bell, Tickets, Document, Timer, Files } from '@element-plus/icons-vue'
 
 defineOptions({ name: 'Index' })
 
@@ -298,6 +355,9 @@ const myProcesses = ref<ProcessInstanceVO[]>([])
 // 待办任务
 const todoTasks = ref<TaskVO[]>([])
 
+// 已办任务
+const doneTasks = ref<TaskVO[]>([])
+
 // 通知公告列表相关
 const noticeListVisible = ref(false)
 const noticeListLoading = ref(false)
@@ -341,16 +401,16 @@ const shortcut = ref([
     color: '#1fdaca'
   },
   {
-    name: '待办任务',
-    icon: 'ep:document',
-    url: '/bpm/task/my',
-    color: '#ff6b6b'
-  },
-  {
     name: '我的流程',
     icon: 'ep:tickets',
-    url: '/bpm/task/todo',
+    url: '/bpm/task/my',
     color: '#7c3aed'
+  },
+  {
+    name: '待办任务',
+    icon: 'ep:document',
+    url: '/bpm/task/todo',
+    color: '#ff6b6b'
   },
   {
     name: '已办流程',
@@ -453,6 +513,28 @@ const getTodoTasks = async () => {
   }
 }
 
+// 获取已办任务
+const getDoneTasks = async () => {
+  console.log('开始获取已办任务')
+  try {
+    const res = await TaskApi.getTaskDonePage({
+      pageNo: 1,
+      pageSize: 10
+    })
+    console.log('已办任务API响应:', res)
+    if (res.list) {
+      doneTasks.value = res.list
+      console.log('已办任务数据已更新:', doneTasks.value)
+    } else {
+      console.warn('已办任务API返回异常:', res)
+      doneTasks.value = []
+    }
+  } catch (error) {
+    console.error('获取已办任务失败:', error)
+    doneTasks.value = []
+  }
+}
+
 // 显示通知详情
 const showNoticeDetail = async (id: number) => {
   noticeDetailVisible.value = true
@@ -481,7 +563,8 @@ const getAllApi = async () => {
     const results = await Promise.allSettled([
       getNotices(),
       getMyProcesses(),
-      getTodoTasks()
+      getTodoTasks(),
+      getDoneTasks()
     ])
     console.log('API调用结果:', results)
     results.forEach((result, index) => {
@@ -497,6 +580,7 @@ const getAllApi = async () => {
       notice: notice.value,
       myProcesses: myProcesses.value,
       todoTasks: todoTasks.value,
+      doneTasks: doneTasks.value,
       loading: loading.value
     })
   }
@@ -551,5 +635,14 @@ onMounted(() => {
 }
 .text-danger {
   color: var(--el-color-danger);
+}
+
+.notify-badge :deep(.el-badge__content) {
+  height: 24px;
+  padding: 0 8px;
+  line-height: 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 14px;
 }
 </style>
