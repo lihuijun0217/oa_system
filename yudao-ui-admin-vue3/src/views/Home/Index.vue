@@ -33,14 +33,12 @@
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-4 gap-4">
             <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
                  @click="handleShortcutClick('/bpm/task/todo')">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <el-icon class="mr-3 text-danger" :size="24"><Document /></el-icon>
-                  <span class="text-gray-600">待办任务</span>
-                </div>
+              <div class="flex items-center">
+                <el-icon class="mr-3 text-danger" :size="24"><Document /></el-icon>
+                <span class="text-gray-600 mr-2">待办任务</span>
                 <el-badge :value="todoTasks.length || 0" :max="99" class="notify-badge">
                   <template #content>
                     <span class="text-lg">{{ todoTasks.length || 0 }}</span>
@@ -50,11 +48,9 @@
             </div>
             <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
                  @click="handleShortcutClick('/bpm/task/done')">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <el-icon class="mr-3 text-success" :size="24"><Tickets /></el-icon>
-                  <span class="text-gray-600">已办任务</span>
-                </div>
+              <div class="flex items-center">
+                <el-icon class="mr-3 text-success" :size="24"><Tickets /></el-icon>
+                <span class="text-gray-600 mr-2">已办任务</span>
                 <el-badge :value="doneTasks.length || 0" :max="99" type="success" class="notify-badge">
                   <template #content>
                     <span class="text-lg">{{ doneTasks.length || 0 }}</span>
@@ -64,11 +60,9 @@
             </div>
             <div class="cursor-pointer hover:bg-gray-50 rounded-lg p-4 transition-all" 
                  @click="handleShortcutClick('/bpm/task/my')">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <el-icon class="mr-3 text-danger" :size="24"><Timer /></el-icon>
-                  <span class="text-gray-600">我的流程</span>
-                </div>
+              <div class="flex items-center">
+                <el-icon class="mr-3 text-danger" :size="24"><Timer /></el-icon>
+                <span class="text-gray-600 mr-2">我的流程</span>
                 <el-badge :value="myProcesses.length || 0" :max="99" class="notify-badge">
                   <template #content>
                     <span class="text-lg">{{ myProcesses.length || 0 }}</span>
@@ -141,7 +135,7 @@
               <el-icon class="mr-2 text-success" :size="20"><Tickets /></el-icon>
               <span class="text-lg font-medium">我的流程（审批中）</span>
             </div>
-            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">
+            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
               查看更多
             </el-link>
           </div>
@@ -171,7 +165,7 @@
               <el-icon class="mr-2 text-danger" :size="20"><Document /></el-icon>
               <span class="text-lg font-medium">待办任务</span>
             </div>
-            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
+            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">
               查看更多
             </el-link>
           </div>
