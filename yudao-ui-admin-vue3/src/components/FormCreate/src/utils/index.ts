@@ -30,10 +30,14 @@ export const parseFormFields = (
   parentTitle: string = ''
 ) => {
   const { type, field, $required, title: tempTitle, children } = rule
-  if (field && tempTitle) {
+  if (field) {
     let title = tempTitle
     if (parentTitle) {
       title = `${parentTitle}.${tempTitle}`
+    }
+    // 如果没有title，使用field作为默认title
+    if (!title || title.trim() === '') {
+      title = field
     }
     let required = false
     if ($required) {

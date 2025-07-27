@@ -11,6 +11,8 @@ import cn.iocoder.yudao.module.bpm.controller.admin.definition.vo.form.BpmFormFi
 import cn.iocoder.yudao.module.bpm.dal.dataobject.definition.BpmProcessDefinitionInfoDO;
 import cn.iocoder.yudao.module.bpm.enums.definition.BpmModelFormTypeEnum;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.enums.BpmnVariableConstants;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.SneakyThrows;
 import org.flowable.common.engine.api.delegate.Expression;
 import org.flowable.common.engine.api.variable.VariableContainer;
@@ -247,8 +249,15 @@ public class FlowableUtils {
         Map<String, BpmFormFieldVO> formFieldsMap = new HashMap<>();
         processDefinitionInfo.getFormFields().forEach(formFieldStr -> {
             BpmFormFieldVO formField = JsonUtils.parseObject(formFieldStr, BpmFormFieldVO.class);
-            if (formField != null) {
+            if (formField != null && formField.getField() != null) {
                 formFieldsMap.put(formField.getField(), formField);
+            }
+            try{
+                JSONObject fieldJson = JSONObject.parseObject(formFieldStr);
+                List<BpmFormFieldVO> childrens = JSONArray.parseArray( fieldJson.getString("children"), BpmFormFieldVO.class);
+                formFieldsMap.putAll(childrens.stream().filter(e->e.getField()!=null).collect(Collectors.toMap(BpmFormFieldVO::getField, e->e)));
+            }catch (Exception e){
+
             }
         });
 
@@ -258,7 +267,7 @@ public class FlowableUtils {
             return convertList(processDefinitionInfo.getSummarySetting().getSummary(), item -> {
                 BpmFormFieldVO formField = formFieldsMap.get(item);
                 if (formField != null) {
-                    return new KeyValue<String, String>(formField.getTitle(),
+                    return new KeyValue<>(Objects.toString(formField.getTitle(), item),
                             processVariables.getOrDefault(item, "").toString());
                 }
                 return null;

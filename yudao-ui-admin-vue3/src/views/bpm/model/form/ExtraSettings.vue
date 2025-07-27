@@ -124,20 +124,24 @@
             <el-radio :value="true"> 自定义摘要 </el-radio>
           </div>
         </el-radio-group>
-        <el-select
-          class="w-500px!"
-          v-if="modelData.summarySetting.enable"
-          v-model="modelData.summarySetting.summary"
-          multiple
-          placeholder="请选择要展示的表单字段"
-        >
-          <el-option
-            v-for="item in formFieldOptions4Summary"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
+        <div v-if="modelData.summarySetting.enable" class="mt-10px">
+          <el-checkbox v-model="showFieldsWithoutTitle" class="mb-10px">
+            显示没有标签名称的字段
+          </el-checkbox>
+          <el-select
+            class="w-500px!"
+            v-model="modelData.summarySetting.summary"
+            multiple
+            placeholder="请选择要展示的表单字段"
+          >
+            <el-option
+              v-for="item in formFieldOptions4Summary"
+              :key="item.value"
+              :label="item.value"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
       </div>
     </el-form-item>
     <el-form-item class="mb-20px">
@@ -371,13 +375,25 @@ const formFieldOptions4Title = computed(() => {
   return cloneFormField
 })
 const formFieldOptions4Summary = computed(() => {
-  return formField.value.map((item) => {
-    return {
-      label: item.title,
-      value: item.field
-    }
-  })
+  return formField.value
+    .filter((item) => {
+      // 根据设置决定是否显示没有title的字段
+      if (showFieldsWithoutTitle.value) {
+        return true // 显示所有字段
+      } else {
+        return item.title && item.title.trim() !== ''
+      }
+    })
+    .map((item) => {
+      return {
+        label: item.title || `字段${item.field}`, // 如果没有title，使用默认名称
+        value: item.field
+      }
+    })
 })
+
+/** 是否显示没有标签名称的字段 */
+const showFieldsWithoutTitle = ref(false)
 
 /** 兼容以前未配置更多设置的流程 */
 const initData = () => {
@@ -417,6 +433,7 @@ const initData = () => {
   if (modelData.value.taskAfterTriggerSetting) {
     taskAfterTriggerEnable.value = true
   }
+  showFieldsWithoutTitle.value = modelData.value.summarySetting.showFieldsWithoutTitle || false
 }
 defineExpose({ initData })
 
@@ -438,5 +455,15 @@ watch(
     }
   },
   { immediate: true }
+)
+
+/** 监听showFieldsWithoutTitle变化，保存到modelData */
+watch(
+  () => showFieldsWithoutTitle.value,
+  (newValue) => {
+    if (modelData.value.summarySetting) {
+      modelData.value.summarySetting.showFieldsWithoutTitle = newValue
+    }
+  }
 )
 </script>

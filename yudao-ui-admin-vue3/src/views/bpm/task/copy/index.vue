@@ -50,7 +50,7 @@
         <template #default="scope">
           <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
             <div v-for="(item, index) in scope.row.summary" :key="index">
-              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+              <el-text type="info">  {{ item.value }} </el-text>
             </div>
           </div>
         </template>
