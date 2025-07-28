@@ -278,7 +278,15 @@ const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.WRITE) {
     //@ts-ignore
     fApi.value?.disabled(false, field)
-    // 加入可以编辑的字段
+    // nextTick(() => {
+    //   const elProxy = fApi.value?.el(field)
+    //   if (elProxy?.input) {
+    //     elProxy?.input.removeAttribute('readonly')
+    //   }
+    //   if (elProxy?.textarea) {
+    //     elProxy?.textarea.removeAttribute('readonly')
+    //   }
+    // })
     writableFields.push(field)
   }
   if (permission === FieldPermissionType.NONE) {

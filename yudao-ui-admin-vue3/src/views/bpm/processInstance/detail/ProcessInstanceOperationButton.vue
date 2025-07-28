@@ -527,6 +527,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import { isEmpty } from '@/utils/is'
+import { watch } from 'vue'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -682,6 +683,24 @@ watch(
     deep: true
   }
 )
+
+/** 审批意见同步到主表单 */
+// 填写意见单向同步到主表单第一个可编辑字段
+watch(() => approveReasonForm.reason, (val) => {
+  if (props.writableFields.length > 0) {
+    props.normalFormApi?.setValue(props.writableFields[0], val)
+  }
+})
+watch(() => rejectReasonForm.reason, (val) => {
+  if (props.writableFields.length > 0) {
+    props.normalFormApi?.setValue(props.writableFields[0], val)
+  }
+})
+watch(() => returnForm.returnReason, (val) => {
+  if (props.writableFields.length > 0) {
+    props.normalFormApi?.setValue(props.writableFields[0], val)
+  }
+})
 
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
