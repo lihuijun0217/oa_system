@@ -89,8 +89,8 @@ const setMenuTheme = (color: string) => {
   appStore.setCssVarTheme()
 }
 if (layout.value === 'top' && !appStore.getIsDark) {
-  headerTheme.value = '#fff'
-  setHeaderTheme('#fff')
+  headerTheme.value = '#5172dc'
+  setHeaderTheme('#5172dc')
 }
 
 // 监听layout变化，重置一些主题色
@@ -98,8 +98,8 @@ watch(
   () => layout.value,
   (n) => {
     if (n === 'top' && !appStore.getIsDark) {
-      headerTheme.value = '#fff'
-      setHeaderTheme('#fff')
+      headerTheme.value = '#5172dc'
+      setHeaderTheme('#5172dc')
     } else {
       setMenuTheme(unref(menuTheme))
     }
@@ -215,8 +215,8 @@ const clear = () => {
 
     <div class="text-center">
       <!-- 主题 -->
-      <ElDivider>{{ t('setting.theme') }}</ElDivider>
-      <ThemeSwitch />
+      <!-- <ElDivider>{{ t('setting.theme') }}</ElDivider>
+      <ThemeSwitch /> -->
 
       <!-- 布局 -->
       <ElDivider>{{ t('setting.layout') }}</ElDivider>

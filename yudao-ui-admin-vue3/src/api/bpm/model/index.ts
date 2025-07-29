@@ -26,8 +26,29 @@ export type ModelVO = {
   bpmnXml: string
 }
 
+export interface BpmModelVO {
+  id: string
+  key: string
+  name: string
+  category: string
+  categoryName: string
+  formName: string
+  icon?: string
+  description?: string
+  type?: number
+  formType?: number
+  formId?: number
+  visible?: boolean
+  createTime?: number
+}
+
 export const getModelList = async (name: string | undefined) => {
   return await request.get({ url: '/bpm/model/list', params: { name } })
+}
+
+// 新增：获取BPM模型列表（用于首页）
+export const getBpmModelList = async (params: any) => {
+  return await request.get({ url: '/bpm/model/list', params })
 }
 
 export const getModel = async (id: string) => {

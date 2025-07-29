@@ -68,6 +68,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           affix: true
         }
       }
+      // ,
+      // {
+      //   path: 'new-index',
+      //   component: () => import('@/views/Home/NewIndex.vue'),
+      //   name: 'NewIndex',
+      //   meta: {
+      //     title: '门户',
+      //     icon: 'ep:home-filled',
+      //     noCache: false,
+      //     affix: false
+      //   }
+      // }
     ]
   },
   {
