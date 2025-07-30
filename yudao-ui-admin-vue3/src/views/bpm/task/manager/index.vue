@@ -82,13 +82,13 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="审批建议" prop="reason" min-width="180" />
-      <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
+      <!-- <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
         <template #default="scope">
           {{ formatPast2(scope.row.durationInMillis) }}
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column align="center" label="流程编号" prop="processInstanceId" :show-overflow-tooltip="true" />
-      <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
+      <!-- <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" /> -->
       <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">历史</el-button>

@@ -108,8 +108,8 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
-      <el-table-column label="摘要" prop="processInstance.summary" width="180">
+      <el-table-column align="center" label="流程" prop="processInstance.name" min-width="240" />
+      <el-table-column label="摘要" prop="processInstance.summary" min-width="200">
         <template #default="scope">
           <div
             class="flex flex-col"
@@ -125,22 +125,19 @@
         align="center"
         label="发起人"
         prop="processInstance.startUser.nickname"
-        width="100"
       />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="发起时间"
         prop="processInstance.createTime"
-        width="180"
       />
-      <el-table-column align="center" label="当前任务" prop="name" width="180" />
+      <el-table-column align="center" label="当前任务" prop="name"  />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="任务时间"
         prop="createTime"
-        width="180"
       />
       <el-table-column
         align="center"
@@ -148,7 +145,7 @@
         prop="processInstanceId"
         :show-overflow-tooltip="true"
       />
-      <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
+      <!-- <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" /> -->
       <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">办理</el-button>
