@@ -107,6 +107,7 @@ const message = useMessage() // 消息
 
 const searchName = ref('') // 当前搜索关键字
 const processInstanceId: any = route.query.processInstanceId // 流程实例编号。场景：重新发起时
+const processDefinitionKey: any = route.query.processDefinitionKey // 流程定义key。场景：从首页直接发起流程
 const loading = ref(true) // 加载中
 const categoryList: any = ref([]) // 分类的列表
 const categoryActive: any = ref({}) // 选中的分类
@@ -136,6 +137,17 @@ const getList = async () => {
         return
       }
       await handleSelect(processDefinition, processInstance.formVariables)
+    }
+    // 如果 processDefinitionKey 非空，说明是从首页直接发起流程
+    else if (processDefinitionKey?.length > 0) {
+      const processDefinition = processDefinitionList.value.find(
+        (item: any) => item.key == processDefinitionKey
+      )
+      if (!processDefinition) {
+        message.error('发起流程失败，原因：流程定义不存在')
+        return
+      }
+      await handleSelect(processDefinition)
     }
   } finally {
     loading.value = false

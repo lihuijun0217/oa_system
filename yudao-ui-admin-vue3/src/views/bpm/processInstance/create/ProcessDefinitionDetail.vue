@@ -128,8 +128,12 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
     //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
     const allowedFields = decodeFields(row.formFields).map((fieldObj: any) => fieldObj.field)
+    // 修复：类型"object"上不存在属性"children"，需先判断 item 是否有 children 属性
+    const deepAllowedFields = decodeFields(row.formFields).flatMap((item: any) => 
+      item.children?.map((child: any) => child.field) || []
+    ).filter(a => a !== undefined);
     for (const key in formVariables) {
-      if (!allowedFields.includes(key)) {
+      if (!allowedFields.includes(key) && !deepAllowedFields.includes(key)) {
         delete formVariables[key]
       }
     }

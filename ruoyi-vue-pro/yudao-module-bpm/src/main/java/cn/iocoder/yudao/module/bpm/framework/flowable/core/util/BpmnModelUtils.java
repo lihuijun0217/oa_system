@@ -893,9 +893,13 @@ public class BpmnModelUtils {
         // 遍历满足条件的 SequenceFlow 路径
         if (matchSequenceFlow != null) {
             FlowElement targetElement = bpmnModel.getFlowElement(matchSequenceFlow.getTargetRef());
-            if (targetElement instanceof FlowNode) {
-                nextFlowNodes.add((FlowNode) targetElement);
+            //排他网关，直接结束的情况兼容
+            if (!(targetElement instanceof EndEvent)) {
+                if (targetElement instanceof FlowNode) {
+                    nextFlowNodes.add((FlowNode) targetElement);
+                }
             }
+
         }
     }
 

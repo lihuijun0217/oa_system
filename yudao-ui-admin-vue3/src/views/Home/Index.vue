@@ -255,6 +255,7 @@ const fetchWorkflowModels = async () => {
     workflowList.value = res.map((item: any) => ({
       id: item.id,
       name: item.name,
+      key: item.key, // 添加key字段
       icon: item.icon,
       url: item.url
     }))
@@ -263,9 +264,15 @@ const fetchWorkflowModels = async () => {
   }
 }
 
-const handleWorkflowClick = (item: any) => {
-  // 跳转到新建流程页面
-  router.push('/bpm/process-instance/create')
+const handleWorkflowClick = async (item: any) => {
+  // 跳转到新建流程页面，并传递流程定义信息
+  await router.push({
+    name: 'BpmProcessInstanceCreate',
+    query: { 
+      processDefinitionKey: item.key,
+      processDefinitionName: item.name
+    }
+  })
 }
 
 const handleShortcutClick = (url: string) => {
