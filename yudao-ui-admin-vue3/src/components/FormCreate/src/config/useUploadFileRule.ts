@@ -24,13 +24,16 @@ export const useUploadFileRule = () => {
           type: 'select',
           field: 'fileType',
           title: '文件类型',
-          value: ['doc', 'xls', 'ppt', 'txt', 'pdf'],
+          value: ['doc', 'xls', 'ppt', 'txt', 'pdf','jpg','png','jpeg'],
           options: [
             { label: 'doc', value: 'doc' },
             { label: 'xls', value: 'xls' },
             { label: 'ppt', value: 'ppt' },
             { label: 'txt', value: 'txt' },
-            { label: 'pdf', value: 'pdf' }
+            { label: 'pdf', value: 'pdf' },
+            { label: 'jpg', value: 'jpg' },
+            { label: 'png', value: 'png' },
+            { label: 'jpeg', value: 'jpeg' }
           ],
           props: {
             multiple: true

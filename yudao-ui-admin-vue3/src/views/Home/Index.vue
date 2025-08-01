@@ -147,9 +147,12 @@
           </div>
         </template>
         <div class="card-body workflow-grid">
-          <div v-for="item in workflowList" :key="item.id" class="workflow-item" @click="handleWorkflowClick(item)">
+          <div
+v-for="item in workflowNames" :key="item.name" 
+               :class="['workflow-item', { 'valid': item.flowid }]" 
+               @click="handleWorkflowClick(item)">
             <div class="workflow-icon">
-              <img v-if="item.icon" :src="item.icon" :alt="item.name" class="workflow-img" />
+              <i v-if="item.icon" :class="['fas', item.icon]"></i>
               <div v-else class="workflow-default-icon">{{ item.name.charAt(0) }}</div>
             </div>
             <div class="workflow-name">{{ item.name }}</div>
@@ -222,6 +225,74 @@ const systemNavs = ref([
   { name: '系统4', faIcon: 'fa-desktop', bgColor: '#909399', textColor: '#fff' }
 ])
 
+// 业务流程入口数据
+const workflowNames = [
+            {name: "用工申请", icon: "fa-user-plus"},
+            {name: "员工部门（岗位）调整审批", icon: "fa-exchange-alt"},
+            {name: "借用人员审批", icon: "fa-user-friends"},
+            {name: "员工转正考核审批", icon: "fa-user-check"},
+            {name: "劳动合同期满考核", icon: "fa-file-contract"},
+            {name: "劳动合同（聘用协议）期满审批", icon: "fa-file-signature"},
+            {name: "录用人员审批表", icon: "fa-user-tie"},
+            {name: "员工个人信息表", icon: "fa-id-card"},
+            {name: "解除劳动合同通知书审批单", icon: "fa-user-minus"},
+            {name: "员工绩效申诉表", icon: "fa-chart-line"},
+            {name: "专项考核单", icon: "fa-clipboard-check"},
+            {name: "离职审批", icon: "fa-sign-out-alt"},
+            {name: "请假申请", icon: "fa-calendar-minus"},
+            {name: "出差申请", icon: "fa-plane"},
+            {name: "离宁申请", icon: "fa-map-marked-alt"},
+            {name: "医疗期复工申请", icon: "fa-procedures"},
+            {name: "岗位设置变更审批", icon: "fa-user-cog"},
+            {name: "岗位编制调整审批", icon: "fa-users-cog"},
+            {name: "岗位任职资格等级评定申请", icon: "fa-user-graduate"},
+            {name: "岗位任职资格标准修订审批", icon: "fa-user-edit"},
+            {name: "岗位说明书修订审批", icon: "fa-file-edit"},
+            {name: "培训需求审批", icon: "fa-chalkboard-teacher"},
+            {name: "临时培训需求审批", icon: "fa-chalkboard"},
+            {name: "培训计划审批", icon: "fa-calendar-check"},
+            {name: "专项奖励审批", icon: "fa-award"},
+            {name: "合同查询/复印审批", icon: "fa-search"},
+            {name: "合同（协议）审批", icon: "fa-file-signature", flowid: "htgl_hetong"},
+            {name: "资料查（借）阅、复印审批", icon: "fa-file-download"},
+            {name: "档案销毁申请", icon: "fa-trash-alt"},
+            {name: "法人（法人代表）身份证外借登记表", icon: "fa-id-badge"},
+            {name: "评标小组成员审批", icon: "fa-gavel"},
+            {name: "处理废旧、闲置物资价格审定价方式变更审批", icon: "fa-recycle"},
+            {name: "立项审批", icon: "fa-project-diagram"},
+            {name: "询比价审批", icon: "fa-search-dollar"},
+            {name: "独家谈判审批", icon: "fa-handshake"},
+            {name: "招标对外发布审批", icon: "fa-bullhorn", flowid: "zb_wjsp"},
+            {name: "低值易耗品采购申请", icon: "fa-shopping-cart"},
+            {name: "物资采购申请", icon: "fa-boxes"},
+            {name: "设备采购申请", icon: "fa-laptop"},
+            {name: "固定资产采购申请", icon: "fa-building"},
+            {name: "网络（固话）业务办理申请", icon: "fa-network-wired"},
+            {name: "管理标准制（修）订审批", icon: "fa-clipboard-list"},
+            {name: "请示汇报", icon: "fa-comment-alt"},
+            {name: "电子公告发布审批", icon: "fa-bullhorn"},
+            {name: "新闻报道发布审批", icon: "fa-newspaper"},
+            {name: "刻章印章申请", icon: "fa-stamp"},
+            {name: "印章使用申请", icon: "fa-stamp"},
+            {name: "印章外借申请", icon: "fa-stamp"},
+            {name: "介绍信用印审批", icon: "fa-envelope-open-text"},
+            {name: "资产维修申报", icon: "fa-tools"},
+            {name: "资产调拨申请", icon: "fa-exchange-alt"},
+            {name: "资产处置申请", icon: "fa-trash-restore"},
+            {name: "物资搬运申请", icon: "fa-truck-loading"},
+            {name: "资产入库", icon: "fa-warehouse"},
+            {name: "资产出库", icon: "fa-dolly"},
+            {name: "资产报废审批", icon: "fa-trash"},
+            {name: "财务资料查（借）阅审批", icon: "fa-file-invoice-dollar"},
+            {name: "资金（经费）审核审批", icon: "fa-money-bill-wave"},
+            {name: "借款审批单", icon: "fa-hand-holding-usd"},
+            {name: "差旅费报销单", icon: "fa-receipt"},
+            {name: "工程款支付申请", icon: "fa-file-invoice"},
+            {name: "工程立项审批", icon: "fa-hammer"},
+            {name: "合格供应商审查表", icon: "fa-clipboard-check"},
+            {name: "合格供应商退库（暂停）审核", icon: "fa-clipboard-list"},
+            {name: "供应商审验表", icon: "fa-user-tag"}
+        ];
 const workflowList = ref<any[]>([])
 
 // 通知详情相关
@@ -321,14 +392,29 @@ const fetchWorkflowModels = async () => {
 }
 
 const handleWorkflowClick = async (item: any) => {
-  // 跳转到新建流程页面，并传递流程定义信息
-  await router.push({
-    name: 'BpmProcessInstanceCreate',
-    query: { 
-      processDefinitionKey: item.key,
-      processDefinitionName: item.name
-    }
-  })
+  // 检查流程是否有效（是否有flowid且与workflowList中的流程匹配）
+  const isValidFlow = item.flowid && workflowList.value.some(workflow => workflow.key === item.flowid)
+  
+  if (!isValidFlow) {
+    ElMessage.warning('该流程正在开发中，敬请期待！')
+    return
+  }
+  
+  // 找到匹配的流程定义
+  const matchedWorkflow = workflowList.value.find(workflow => workflow.key === item.flowid)
+  
+  if (matchedWorkflow) {
+    // 跳转到新建流程页面，并传递流程定义信息
+    await router.push({
+      name: 'BpmProcessInstanceCreate',
+      query: { 
+        processDefinitionKey: matchedWorkflow.key,
+        processDefinitionName: matchedWorkflow.name
+      }
+    })
+  } else {
+    ElMessage.error('流程配置异常，请联系管理员')
+  }
 }
 
 const handleShortcutClick = (url: string) => {
@@ -376,6 +462,8 @@ onMounted(() => {
 <style scoped>
 .home-index {
   padding: 24px;
+  padding-bottom: 100px; /* 为底部栏留出足够空间 */
+  box-sizing: border-box;
 }
 .block-1 {
   display: grid;
@@ -695,41 +783,81 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
+.block-3 {
+  height: 600px;
+}
+
 .workflow-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 12px;
+  padding: 16px 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .workflow-item {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  height: 100px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   text-align: center;
+  padding: 12px 8px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-width: 0; /* 防止内容溢出 */
+}
+
+/* 有效流程的样式 */
+.workflow-item.valid {
+  background-color: #f0f8ff;
+  border-color: #b3d8ff;
+}
+
+.workflow-item.valid:hover {
+  background-color: #e6f3ff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  transform: translateY(-3px);
 }
 
 .workflow-item:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
   transform: translateY(-3px);
 }
 
 .workflow-icon {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+  color: #4dabf7;
+  background: transparent;
+  box-shadow: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* 防止图标被压缩 */
+}
+
+.workflow-item:hover .workflow-icon {
+  color: #1890ff;
+  transform: scale(1.1);
 }
 
 .workflow-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .workflow-default-icon {
@@ -738,19 +866,25 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 28px;
-  color: #fff;
-  background-color: #409EFF;
-  border-radius: 4px;
+  font-size: 20px;
+  color: #4dabf7;
+  background: transparent;
+  border-radius: 8px;
 }
 
 .workflow-name {
-  font-size: 14px;
-  color: #333;
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 
 .cursor-pointer {

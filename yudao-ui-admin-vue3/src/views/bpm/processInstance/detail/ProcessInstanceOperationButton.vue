@@ -685,20 +685,26 @@ watch(
 )
 
 /** 审批意见同步到主表单 */
-// 填写意见单向同步到主表单第一个可编辑字段
+// 填写意见单向同步到主表单，排除bz字段，同步到第一个非bz的可编辑字段
 watch(() => approveReasonForm.reason, (val) => {
   if (props.writableFields.length > 0) {
-    props.normalFormApi?.setValue(props.writableFields[0], val)
+    // 排除bz字段，找到第一个非bz的可编辑字段
+    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+    props.normalFormApi?.setValue(targetField, val)
   }
 })
 watch(() => rejectReasonForm.reason, (val) => {
   if (props.writableFields.length > 0) {
-    props.normalFormApi?.setValue(props.writableFields[0], val)
+    // 排除bz字段，找到第一个非bz的可编辑字段
+    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+    props.normalFormApi?.setValue(targetField, val)
   }
 })
 watch(() => returnForm.returnReason, (val) => {
   if (props.writableFields.length > 0) {
-    props.normalFormApi?.setValue(props.writableFields[0], val)
+    // 排除bz字段，找到第一个非bz的可编辑字段
+    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+    props.normalFormApi?.setValue(targetField, val)
   }
 })
 
