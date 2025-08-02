@@ -24,6 +24,7 @@ export interface ProfileVO {
   mobile: string
   sex: number
   avatar: string
+  signature: string
   status: number
   remark: string
   loginIp: string
@@ -37,6 +38,7 @@ export interface UserProfileUpdateReqVO {
   mobile?: string
   sex?: number
   avatar?: string
+  signature?: string
 }
 
 // 查询用户个人信息

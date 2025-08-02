@@ -75,6 +75,15 @@ const schema = reactive<FormSchema[]>([
     label: t('profile.user.sex'),
     component: 'InputNumber',
     value: 0
+  },
+  {
+    field: 'signature',
+    label: t('profile.user.signature'),
+    component: 'UploadImg',
+    componentProps: {
+      fileType: ['image/png'],
+      tip: '仅支持PNG格式图片'
+    }
   }
 ])
 const formRef = ref<FormExpose>() // 表单 Ref

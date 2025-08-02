@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.system.controller.admin.user.vo.user;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.system.enums.DictTypeConstants;
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +25,9 @@ public class UserRespVO{
     @ExcelProperty("用户名称")
     private String username;
 
+    @Schema(description = "用户签名", requiredMode = Schema.RequiredMode.REQUIRED, example = "yudao")
+    @ExcelIgnore
+    private String signature;
     @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "芋艿")
     @ExcelProperty("用户昵称")
     private String nickname;

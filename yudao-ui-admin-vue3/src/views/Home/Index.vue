@@ -155,7 +155,9 @@ v-for="item in workflowNames" :key="item.name"
               <i v-if="item.icon" :class="['fas', item.icon]"></i>
               <div v-else class="workflow-default-icon">{{ item.name.charAt(0) }}</div>
             </div>
-            <div class="workflow-name">{{ item.name }}</div>
+            <div class="workflow-name">
+              <div class="workflow-name-text">{{ item.name }}</div>
+            </div>
           </div>
         </div>
       </el-card>
@@ -329,8 +331,19 @@ const fetchStats = async () => {
 
 const fetchDeptName = async () => {
   if (user.deptId) {
-    const res = await getDept(user.deptId)
-    deptName.value = res.name || ''
+    try {
+      console.log('开始获取部门信息，用户deptId:', user.deptId)
+      const res = await getDept(user.deptId)
+      deptName.value = res.name || ''
+      // console.log('获取部门信息成功:', res.name)
+    } catch (error) {
+      // console.error('获取部门信息失败:', error)
+      // 如果获取部门信息失败，不影响页面其他功能
+      deptName.value = ''
+      // 可以在这里添加更详细的错误处理，比如显示默认值
+    }
+  } else {
+    // console.log('用户没有deptId，跳过获取部门信息')
   }
 }
 
@@ -800,10 +813,10 @@ onMounted(() => {
   background-color: #ffffff;
   border-radius: 8px;
   border: 1px solid #e8e8e8;
-  height: 100px;
+  height: 120px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   text-align: center;
   padding: 12px 8px;
@@ -840,6 +853,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   margin-bottom: 8px;
+  margin-top: 4px;
   font-size: 20px;
   color: #4dabf7;
   background: transparent;
@@ -873,18 +887,28 @@ onMounted(() => {
 }
 
 .workflow-name {
-  font-size: 13px;
+  font-size: 12px;
   color: #444;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  line-height: 1.3;
   word-break: break-word;
+  text-align: center;
+  padding: 0 2px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.workflow-name-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.3;
 }
 
 .cursor-pointer {

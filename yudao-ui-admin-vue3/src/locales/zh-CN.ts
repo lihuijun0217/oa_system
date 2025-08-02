@@ -412,7 +412,8 @@ export default {
       sex: '性别',
       man: '男',
       woman: '女',
-      createTime: '创建日期'
+      createTime: '创建日期',
+      signature: '签名图片'
     },
     info: {
       title: '基本信息',

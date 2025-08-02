@@ -63,7 +63,7 @@
             prop="signPicUrl"
             ref="approveSignFormRef"
           >
-            <el-button @click="signRef.open()">点击签名</el-button>
+            <el-button @click="handleSignClick">点击签名</el-button>
             <el-image
               class="w-90px h-40px ml-5px"
               v-if="approveReasonForm.signPicUrl"
@@ -516,6 +516,7 @@ import { setConfAndFields2 } from '@/utils/formCreate'
 import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
+import * as ProfileApi from '@/api/system/user/profile'
 import {
   NodeType,
   OPERATION_BUTTON_NAME,
@@ -528,6 +529,7 @@ import SignDialog from './SignDialog.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import { isEmpty } from '@/utils/is'
 import { watch } from 'vue'
+import { ElMessageBox } from 'element-plus'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -685,28 +687,25 @@ watch(
 )
 
 /** 审批意见同步到主表单 */
-// 填写意见单向同步到主表单，排除bz字段，同步到第一个非bz的可编辑字段
-watch(() => approveReasonForm.reason, (val) => {
-  if (props.writableFields.length > 0) {
-    // 排除bz字段，找到第一个非bz的可编辑字段
-    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
-    props.normalFormApi?.setValue(targetField, val)
-  }
-})
-watch(() => rejectReasonForm.reason, (val) => {
-  if (props.writableFields.length > 0) {
-    // 排除bz字段，找到第一个非bz的可编辑字段
-    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
-    props.normalFormApi?.setValue(targetField, val)
-  }
-})
-watch(() => returnForm.returnReason, (val) => {
-  if (props.writableFields.length > 0) {
-    // 排除bz字段，找到第一个非bz的可编辑字段
-    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
-    props.normalFormApi?.setValue(targetField, val)
-  }
-})
+// 创建通用的意见监听函数
+const createReasonWatcher = (reasonRef: any, reasonKey: string) => {
+  return watch(() => reasonRef[reasonKey], async (val) => {
+    if (props.writableFields.length > 0) {
+      // 排除bz字段，找到第一个非bz的可编辑字段
+      const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+      props.normalFormApi?.setValue(targetField, val)
+      
+      // 设置签名相关字段
+      await setSignatureFields()
+    }
+  })
+}
+
+// 创建各个意见的监听器
+createReasonWatcher(approveReasonForm, 'reason')
+createReasonWatcher(rejectReasonForm, 'reason')
+createReasonWatcher(returnForm, 'returnReason')
+createReasonWatcher(cancelForm, 'cancelReason')
 
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
@@ -975,6 +974,7 @@ const handleCancel = async () => {
     // 1.1 校验表单
     if (!cancelFormRef.value) return
     await cancelFormRef.value.validate()
+    
     // 1.2 提交取消
     await ProcessInstanceApi.cancelProcessInstanceByStartUser(
       props.processInstance.id,
@@ -1109,6 +1109,26 @@ const getUpdatedProcessInstanceVariables = () => {
   props.writableFields.forEach((field) => {
     variables[field] = props.normalFormApi.getValue(field)
   })
+  
+  // 添加签名字段到variables中
+  if (props.writableFields.length > 0) {
+    const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+    
+    // 添加日期字段
+    const dateField = targetField + '_rq'
+    const dateValue = props.normalFormApi.getValue(dateField)
+    if (dateValue) {
+      variables[dateField] = dateValue
+    }
+    
+    // 添加签名地址字段
+    const signatureField = targetField + '_signature'
+    const signatureValue = props.normalFormApi.getValue(signatureField)
+    if (signatureValue) {
+      variables[signatureField] = signatureValue
+    }
+  }
+  
   return variables
 }
 
@@ -1116,6 +1136,80 @@ const getUpdatedProcessInstanceVariables = () => {
 const handleSignFinish = (url: string) => {
   approveReasonForm.signPicUrl = url
   approveSignFormRef.value.validate('change')
+}
+
+/** 设置签名相关字段 */
+const setSignatureFields = async () => {
+  try {
+    // 获取用户签名图片
+    const userProfile = await ProfileApi.getUserProfile()
+    if (userProfile.signature && props.writableFields.length > 0) {
+      // 找到第一个非bz的可编辑字段作为targetField
+      const targetField = props.writableFields.find(field => field !== 'bz') || props.writableFields[0]
+      
+      // 设置图片src - 通过DOM操作设置img元素的src
+      const imgField = targetField + '_img'
+      const imgElement = document.getElementById(imgField) as HTMLImageElement
+      if (imgElement) {
+        imgElement.src = userProfile.signature
+      }
+      
+      // 设置当前日期
+      const dateField = targetField + '_rq'
+      const currentDate = new Date().toISOString().split('T')[0] // 格式：yyyy-MM-dd
+      props.normalFormApi?.setValue(dateField, currentDate)
+      
+      // 设置签名地址
+      const signatureField = targetField + '_signature'
+      props.normalFormApi?.setValue(signatureField, userProfile.signature)
+      
+      return userProfile.signature
+    }
+    return null
+  } catch (error) {
+    console.error('设置签名字段失败:', error)
+    return null
+  }
+}
+
+/** 处理签名点击 */
+const handleSignClick = async () => {
+  if (runningTask.value?.signEnable) {
+    try {
+      // 获取用户签名图片
+      const userProfile = await ProfileApi.getUserProfile()
+      if (userProfile.signature) {
+        // 如果有签名图片，直接使用
+        approveReasonForm.signPicUrl = userProfile.signature
+        
+        // 设置签名相关字段
+        await setSignatureFields()
+        
+        approveSignFormRef.value.validate('change')
+        message.success('已使用您的签名图片')
+      } else {
+        // 如果没有签名图片，提示用户去配置
+        ElMessageBox.confirm(
+          '您还没有配置签名图片，是否前往个人中心配置？',
+          '签名配置',
+          {
+            confirmButtonText: '去配置',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        ).then(() => {
+          // 跳转到个人中心
+          router.push('/user/profile')
+        }).catch(() => {
+          // 用户取消
+        })
+      }
+    } catch (error) {
+      message.error('获取用户签名失败，请稍后重试')
+    }
+  } else {
+    message.warning('当前流程实例不支持签名功能。')
+  }
 }
 
 defineExpose({ loadTodoTask })

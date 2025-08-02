@@ -10,6 +10,7 @@ export interface UserVO {
   mobile: string
   sex: number
   avatar: string
+  signature: string
   loginIp: string
   status: number
   remark: string

@@ -418,7 +418,8 @@ export default {
       sex: 'Sex',
       man: 'Man',
       woman: 'Woman',
-      createTime: 'Created Date'
+      createTime: 'Created Date',
+      signature: 'Signature Image'
     },
     info: {
       title: 'Basic Information',

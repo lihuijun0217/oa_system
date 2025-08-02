@@ -132,10 +132,38 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     const deepAllowedFields = decodeFields(row.formFields).flatMap((item: any) => 
       item.children?.map((child: any) => child.field) || []
     ).filter(a => a !== undefined);
+    
+    // 过滤掉签名字段相关的字段
+    const fieldsToRemove = new Set<string>()
+    
     for (const key in formVariables) {
+      // 检查是否在允许的字段列表中
       if (!allowedFields.includes(key) && !deepAllowedFields.includes(key)) {
-        delete formVariables[key]
+        fieldsToRemove.add(key)
+        continue
       }
+      
+      // 检查是否包含下划线（如_signature、_rq、_img等）
+      if (key.includes('_')) {
+        fieldsToRemove.add(key)
+        // 同时标记对应的基础字段也要删除
+        const baseField = key.split('_')[0]
+        fieldsToRemove.add(baseField)
+        continue
+      }
+      
+      // 检查是否为基础字段，且存在对应的下划线字段
+      const hasUnderscoreField = Object.keys(formVariables).some(field => 
+        field.startsWith(key + '_')
+      )
+      if (hasUnderscoreField) {
+        fieldsToRemove.add(key)
+      }
+    }
+    
+    // 删除需要移除的字段
+    for (const field of fieldsToRemove) {
+      delete formVariables[field]
     }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
 

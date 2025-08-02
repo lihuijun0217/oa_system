@@ -128,6 +128,18 @@
               />
             </template>
           </el-table-column>
+          <el-table-column label="签名图片" align="center" width="120">
+            <template #default="scope">
+              <img
+                v-if="scope.row.signature"
+                :src="scope.row.signature"
+                class="signature-img"
+                alt="签名图片"
+                @click="previewSignature(scope.row.signature)"
+              />
+              <span v-else class="text-gray-400">未设置</span>
+            </template>
+          </el-table-column>
           <el-table-column
             label="创建时间"
             align="center"
@@ -356,8 +368,29 @@ const handleRole = (row: UserApi.UserVO) => {
   assignRoleFormRef.value.open(row)
 }
 
+/** 预览签名图片 */
+const previewSignature = (url: string) => {
+  window.open(url, '_blank')
+}
+
 /** 初始化 */
 onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.signature-img {
+  max-width: 80px;
+  max-height: 40px;
+  border: 1px solid #e7eaec;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.signature-img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style>

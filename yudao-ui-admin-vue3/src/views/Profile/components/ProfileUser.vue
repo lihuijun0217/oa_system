@@ -43,6 +43,14 @@
         {{ t('profile.user.createTime') }}
         <div class="pull-right">{{ formatDate(userInfo.createTime) }}</div>
       </li>
+      <li class="list-group-item">
+        <Icon class="mr-5px" icon="ep:edit" />
+        {{ t('profile.user.signature') }}
+        <div v-if="userInfo?.signature" class="pull-right">
+          <img :src="userInfo.signature" class="signature-img" alt="签名图片" />
+        </div>
+        <div v-else class="pull-right">未设置</div>
+      </li>
     </ul>
   </div>
 </template>
@@ -101,5 +109,12 @@ onMounted(async () => {
 
 .pull-right {
   float: right !important;
+}
+
+.signature-img {
+  max-width: 100px;
+  max-height: 50px;
+  border: 1px solid #e7eaec;
+  border-radius: 4px;
 }
 </style>

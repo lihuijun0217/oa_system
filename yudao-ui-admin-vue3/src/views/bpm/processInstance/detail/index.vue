@@ -235,6 +235,9 @@ const getApprovalDetail = async () => {
             setFieldPermission(item, formFieldsPermission[item])
           })
         }
+        
+        // 处理签名字段的特殊逻辑
+        handleSignatureFields(processInstance.value.formVariables)
       })
     } else {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
@@ -265,8 +268,34 @@ const getProcessModelView = async () => {
   }
 }
 
+/**
+ * 处理签名字段的特殊逻辑
+ * 当存在 xxx_signature 字段时，设置对应 id 为 xxx_img 的 img dom 的 src
+ */
+const handleSignatureFields = (formVariables: any) => {
+  if (!formVariables) return
+  
+  // 遍历表单变量，查找签名字段
+  Object.keys(formVariables).forEach((key) => {
+    if (key.endsWith('_signature') && formVariables[key]) {
+      // 提取基础字段名（去掉 _signature 后缀）
+      const baseField = key.replace('_signature', '')
+      
+      // 构造对应的图片字段 id
+      const imgFieldId = baseField + '_img'
+      
+      // 查找对应的 img 元素并设置 src
+      const imgElement = document.getElementById(imgFieldId) as HTMLImageElement
+      if (imgElement) {
+        imgElement.src = formVariables[key]
+      }
+    }
+  })
+}
+
 // 审批节点信息
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+
 /**
  * 设置表单权限
  */

@@ -34,6 +34,8 @@ public class UserProfileRespVO {
     @Schema(description = "用户头像", example = "https://www.iocoder.cn/xxx.png")
     private String avatar;
 
+    @Schema(description = "用户签名", example = "https://www.iocoder.cn/xxx.png")
+    private String signature;
     @Schema(description = "最后登录 IP", requiredMode = Schema.RequiredMode.REQUIRED, example = "192.168.1.1")
     private String loginIp;
 

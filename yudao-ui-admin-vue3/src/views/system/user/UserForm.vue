@@ -83,6 +83,17 @@
       </el-row>
       <el-row>
         <el-col :span="24">
+          <el-form-item label="签名图片">
+            <UploadImg
+              v-model="formData.signature"
+              :file-type="['image/png']"
+              tip="仅支持PNG格式图片"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
           <el-form-item label="备注">
             <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
           </el-form-item>
@@ -103,6 +114,7 @@ import * as PostApi from '@/api/system/post'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { FormRules } from 'element-plus'
+import { UploadImg } from '@/components/UploadFile'
 
 defineOptions({ name: 'SystemUserForm' })
 
@@ -125,7 +137,8 @@ const formData = ref({
   postIds: [],
   remark: '',
   status: CommonStatusEnum.ENABLE,
-  roleIds: []
+  roleIds: [],
+  signature: ''
 })
 const formRules = reactive<FormRules>({
   username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
@@ -212,7 +225,8 @@ const resetForm = () => {
     postIds: [],
     remark: '',
     status: CommonStatusEnum.ENABLE,
-    roleIds: []
+    roleIds: [],
+    signature: ''
   }
   formRef.value?.resetFields()
 }

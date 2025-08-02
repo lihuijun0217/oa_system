@@ -28,6 +28,9 @@ public class UserSaveReqVO {
     @DiffLogField(name = "用户账号")
     private String username;
 
+    @Schema(description = "用户签名", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户签名")
+    @DiffLogField(name = "用户签名")
+    private String signature;
     @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "芋艿")
     @Size(max = 30, message = "用户昵称长度不能超过30个字符")
     @DiffLogField(name = "用户昵称")

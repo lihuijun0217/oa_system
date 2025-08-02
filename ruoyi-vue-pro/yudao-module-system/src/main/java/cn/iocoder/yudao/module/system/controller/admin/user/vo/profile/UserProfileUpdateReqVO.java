@@ -33,4 +33,7 @@ public class UserProfileUpdateReqVO {
     @URL(message = "头像地址格式不正确")
     private String avatar;
 
+    @Schema(description = "用户签名", example = "https://www.iocoder.cn/xxx.png")
+    private String signature;
+
 }

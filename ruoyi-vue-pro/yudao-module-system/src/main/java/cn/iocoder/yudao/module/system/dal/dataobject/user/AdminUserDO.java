@@ -79,6 +79,10 @@ public class AdminUserDO extends TenantBaseDO {
      */
     private String avatar;
     /**
+     * 用户签名
+     */
+    private String signature;
+    /**
      * 帐号状态
      *
      * 枚举 {@link CommonStatusEnum}
