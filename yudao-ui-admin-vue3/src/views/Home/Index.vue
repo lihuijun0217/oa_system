@@ -1,6 +1,8 @@
 <template>
   <div class="home-index">
     <!-- 第一模块：欢迎语、文件统计、当前登录人员及部门 -->
+
+    
     <div class="block block-1" style="height: 400px;">
       <!-- 通知公告 -->
       <el-card class="card notice-card">
@@ -20,12 +22,12 @@
         </div>
       </el-card>
       
-      <el-card shadow="never" class="mt-8px">
+      <el-card shadow="never">
         <template #header>
-          <div class="h-3 flex justify-between items-center">
-            <div class="flex items-center">
-              <el-icon class="mr-2 text-danger" :size="20"><Document /></el-icon>
-              <span class="text-lg font-medium">待办任务</span>
+          <div class="flex justify-between items-center">
+            <div class="card-header">
+             
+              <span >待办任务</span>
             </div>
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">
               查看更多
@@ -88,12 +90,12 @@
         </div>
       </el-card>
 
-      <el-card shadow="never" class="mt-8px">
+      <el-card shadow="never">
         <template #header>
-          <div class="h-3 flex justify-between items-center">
-            <div class="flex items-center">
-              <el-icon class="mr-2 text-success" :size="20"><Tickets /></el-icon>
-              <span class="text-lg font-medium">我的流程</span>
+          <div class="flex justify-between items-center ">
+            <div  class="card-header">
+              
+              <span >我的流程</span>
             </div>
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
               查看更多
@@ -116,14 +118,14 @@
           <el-empty v-else description="暂无流程" />
       </el-card>
       <!-- 系统导航 -->
-      <el-card class="card system-nav-card">
+      <el-card class="card  system-nav-card ">
         <template #header>
           <div class="card-header">
             <span>系统导航</span>
             <!-- <el-link type="primary" :underline="false">更多</el-link> -->
           </div>
         </template>
-        <div class="card-body system-nav-grid">
+        <div class="card-body system-nav-grid-item">
           <div v-for="(nav, index) in systemNavs" :key="index" class="nav-item">
             <div class="nav-icon" :style="{ backgroundColor: nav.bgColor, color: nav.textColor }">
               <i v-if="nav.faIcon" :class="['fas', nav.faIcon]"></i>
@@ -475,12 +477,13 @@ onMounted(() => {
 <style scoped>
 .home-index {
   padding: 24px;
+  padding-right: 0;
   padding-bottom: 100px; /* 为底部栏留出足够空间 */
   box-sizing: border-box;
 }
 .block-1 {
   display: grid;
-  grid-template-columns: 30% 50% 20%;
+  grid-template-columns: 30% 50% 1fr;
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -643,7 +646,7 @@ onMounted(() => {
 /* 第二模块样式 */
 .block-2 {
   display: grid;
-  grid-template-columns: 30% 50% 20%;
+  grid-template-columns: 30% 50% 1fr;
   gap: 24px;
   margin-bottom: 24px;
   /* border: 2px solid red; 调试用 */
@@ -741,10 +744,33 @@ onMounted(() => {
 
 /* 系统导航 */
 .system-nav-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   padding: 10px;
+  align-item:  center;
+}
+.system-nav-card{
+    display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px;
+  align-item:  center;
+}
+.system-nav-grid-item{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 50px;
+  padding: 10px;
+}
+.system-nav-card :deep(.el-card__body) {
+  padding: 20px;
+
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-item {
@@ -798,6 +824,11 @@ onMounted(() => {
 
 .block-3 {
   height: 600px;
+
+}
+
+.block-3 .workflow-card{
+  padding-top: 0;
 }
 
 .workflow-grid {
@@ -813,7 +844,7 @@ onMounted(() => {
   background-color: #ffffff;
   border-radius: 8px;
   border: 1px solid #e8e8e8;
-  height: 120px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -846,8 +877,8 @@ onMounted(() => {
 }
 
 .workflow-icon {
-  width: 48px;
-  height: 48px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   display: flex;
   justify-content: center;
