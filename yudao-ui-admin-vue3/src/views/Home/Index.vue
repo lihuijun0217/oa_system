@@ -757,6 +757,7 @@ onMounted(() => {
   gap: 16px;
   padding: 10px;
   align-item:  center;
+  padding-top: 0;
 }
 .system-nav-grid-item{
   display: grid;
