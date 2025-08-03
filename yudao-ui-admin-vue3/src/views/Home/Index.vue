@@ -30,7 +30,7 @@
               <span >待办任务</span>
             </div>
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">
-              查看更多
+              更多
             </el-link>
           </div>
         </template>
@@ -98,7 +98,7 @@
               <span >我的流程</span>
             </div>
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
-              查看更多
+              更多
             </el-link>
           </div>
         </template>
@@ -143,7 +143,7 @@
             <span>业务流程入口</span>
             <!-- <div class="header-actions">
               <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">
-                查看更多
+                更多
               </el-link>
             </div> -->
           </div>
