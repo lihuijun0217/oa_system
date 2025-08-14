@@ -95,6 +95,7 @@
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
+import * as ProcessChainApi from '@/api/bpm/processChain'
 import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
 import { groupBy } from 'lodash-es'
 import { subString } from '@/utils/index'
@@ -108,6 +109,7 @@ const message = useMessage() // 消息
 const searchName = ref('') // 当前搜索关键字
 const processInstanceId: any = route.query.processInstanceId // 流程实例编号。场景：重新发起时
 const processDefinitionKey: any = route.query.processDefinitionKey // 流程定义key。场景：从首页直接发起流程
+const sourceProcessInstanceId: any = route.query.sourceProcessInstanceId // 源流程实例编号。场景：后续流程发起时
 const loading = ref(true) // 加载中
 const categoryList: any = ref([]) // 分类的列表
 const categoryActive: any = ref({}) // 选中的分类
@@ -124,11 +126,15 @@ const getList = async () => {
 
     // 如果 processInstanceId 非空，说明是重新发起
     if (processInstanceId?.length > 0) {
+      console.log('重新发起流程，processInstanceId:', processInstanceId)
       const processInstance = await ProcessInstanceApi.getProcessInstance(processInstanceId)
       if (!processInstance) {
         message.error('重新发起流程失败，原因：流程实例不存在')
         return
       }
+      console.log('获取到的流程实例:', processInstance)
+      console.log('流程实例的表单变量:', processInstance.formVariables)
+      
       const processDefinition = processDefinitionList.value.find(
         (item: any) => item.key == processInstance.processDefinition?.key
       )
@@ -136,6 +142,7 @@ const getList = async () => {
         message.error('重新发起流程失败，原因：流程定义不存在')
         return
       }
+      console.log('找到的流程定义:', processDefinition)
       await handleSelect(processDefinition, processInstance.formVariables)
     }
     // 如果 processDefinitionKey 非空，说明是从首页直接发起流程
@@ -147,7 +154,35 @@ const getList = async () => {
         message.error('发起流程失败，原因：流程定义不存在')
         return
       }
-      await handleSelect(processDefinition)
+      
+      // 如果是后续流程发起，需要获取源流程的表单数据
+      if (sourceProcessInstanceId?.length > 0) {
+        console.log('后续流程发起，sourceProcessInstanceId:', sourceProcessInstanceId)
+        try {
+          const sourceProcessInstance = await ProcessInstanceApi.getProcessInstance(sourceProcessInstanceId)
+          console.log('获取到的源流程实例:', sourceProcessInstance)
+          if (sourceProcessInstance) {
+            console.log('源流程的表单变量:', sourceProcessInstance.formVariables)
+            // 根据串联流程配置生成目标流程的表单数据
+            const targetFormVariables = await generateTargetFormVariables(
+              sourceProcessInstance.processDefinition?.key,
+              processDefinitionKey,
+              sourceProcessInstance.formVariables
+            )
+            console.log('生成的目标流程变量:', targetFormVariables)
+            await handleSelect(processDefinition, targetFormVariables)
+          } else {
+            console.log('源流程实例不存在，使用空表单变量')
+            await handleSelect(processDefinition)
+          }
+        } catch (error) {
+          console.error('获取源流程数据失败:', error)
+          await handleSelect(processDefinition)
+        }
+      } else {
+        console.log('非后续流程发起，使用空表单变量')
+        await handleSelect(processDefinition)
+      }
     }
   } finally {
     loading.value = false
@@ -236,6 +271,11 @@ const processDefinitionDetailRef = ref()
 
 /** 处理选择流程的按钮操作 **/
 const handleSelect = async (row, formVariables?) => {
+  console.log('handleSelect 被调用:', {
+    row,
+    formVariables
+  })
+  
   // 设置选择的流程
   selectProcessDefinition.value = row
   // 初始化流程定义详情
@@ -296,6 +336,32 @@ const availableCategories = computed(() => {
     availableCategoryCodes.includes(category.code)
   )
 })
+
+/** 根据串联流程配置生成目标流程的表单数据 */
+const generateTargetFormVariables = async (sourceProcessKey: string, targetProcessKey: string, sourceVariables: any) => {
+  try {
+    console.log('生成目标流程变量，参数:', {
+      sourceProcessKey,
+      targetProcessKey,
+      sourceVariables
+    })
+    
+    // 调用后端API生成目标流程变量
+    const response = await ProcessChainApi.generateTargetProcessVariablesApi({
+      sourceProcessKey,
+      targetProcessKey,
+      sourceVariables
+    })
+    
+    console.log('API返回结果:', response)
+    
+    // 返回实际的变量数据
+    return response || {}
+  } catch (error) {
+    console.error('生成目标流程变量失败:', error)
+    return {}
+  }
+}
 
 /** 初始化 */
 onMounted(() => {

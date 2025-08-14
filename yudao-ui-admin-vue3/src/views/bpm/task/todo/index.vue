@@ -167,6 +167,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as DefinitionApi from '@/api/bpm/definition'
+import { usePageRefresh } from '@/hooks/web/usePageRefresh'
 
 defineOptions({ name: 'BpmTodoTask' })
 
@@ -229,5 +230,11 @@ onMounted(async () => {
   categoryList.value = await CategoryApi.getCategorySimpleList()
   // 获取流程定义列表
   processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
+})
+
+// 使用页面自动刷新功能
+usePageRefresh(() => {
+  console.log('待办任务页面自动刷新')
+  getList()
 })
 </script>

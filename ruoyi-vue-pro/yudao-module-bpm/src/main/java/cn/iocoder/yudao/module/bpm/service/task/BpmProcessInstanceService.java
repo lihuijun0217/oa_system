@@ -134,6 +134,16 @@ public interface BpmProcessInstanceService {
     String createProcessInstance(Long userId, @Valid BpmProcessInstanceCreateReqDTO createReqDTO);
 
     /**
+     * 基于前流程发起新流程
+     *
+     * @param userId 用户编号
+     * @param sourceProcessInstanceId 源流程实例编号
+     * @param targetProcessDefinitionKey 目标流程定义标识
+     * @return 新流程实例编号
+     */
+    String createProcessInstanceFromSource(Long userId, String sourceProcessInstanceId, String targetProcessDefinitionKey);
+
+    /**
      * 发起人取消流程实例
      *
      * @param userId      用户编号

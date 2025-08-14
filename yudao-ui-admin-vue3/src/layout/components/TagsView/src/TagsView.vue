@@ -74,6 +74,9 @@ const closeSelectedTag = (view: RouteLocationNormalizedLoaded) => {
   closeCurrent(view, () => {
     if (isActive(view)) {
       toLastView()
+    } else {
+      // 如果关闭的不是当前标签页，刷新当前页面数据
+      refreshCurrentPage()
     }
   })
 }
@@ -107,6 +110,8 @@ const closeAllTags = () => {
 // 关闭其它
 const closeOthersTags = () => {
   closeOther()
+  // 关闭其他标签页后，刷新当前页面数据
+  refreshCurrentPage()
 }
 
 // 重新加载
@@ -114,14 +119,27 @@ const refreshSelectedTag = async (view?: RouteLocationNormalizedLoaded) => {
   refreshPage(view)
 }
 
+// 刷新当前页面数据
+const refreshCurrentPage = () => {
+  // 触发当前页面的刷新事件
+  const event = new CustomEvent('refresh-page-data', {
+    detail: { route: unref(currentRoute) }
+  })
+  window.dispatchEvent(event)
+}
+
 // 关闭左侧
 const closeLeftTags = () => {
   closeLeft()
+  // 关闭左侧标签页后，刷新当前页面数据
+  refreshCurrentPage()
 }
 
 // 关闭右侧
 const closeRightTags = () => {
   closeRight()
+  // 关闭右侧标签页后，刷新当前页面数据
+  refreshCurrentPage()
 }
 
 // 滚动到选中的tag
@@ -262,9 +280,14 @@ onBeforeMount(() => {
 
 watch(
   () => currentRoute.value,
-  () => {
+  (newRoute, oldRoute) => {
     addTags()
     moveToCurrentTag()
+    
+    // 如果路由发生变化，刷新页面数据
+    if (newRoute.fullPath !== oldRoute?.fullPath) {
+      refreshCurrentPage()
+    }
   }
 )
 </script>

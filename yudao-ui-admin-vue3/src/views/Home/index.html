@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleOffice办公系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: #333333;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #1890FF;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 24px;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #f5222d;
+            color: #ffffff;
+            font-size: 12px;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 5px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #1890FF;
+            font-weight: bold;
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            display: flex;
+            max-width: 1920px;
+            margin: 80px auto 0;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .left-column {
+            width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .middle-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .right-column {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+            color: #333333;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* 左列内容 */
+        .carousel {
+            height: 200px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #4dabf7, #3bc9db);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .news-list {
+            list-style-type: none;
+        }
+
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .news-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333333;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .news-title:hover {
+            color: #1890ff;
+        }
+
+        .news-content {
+            font-size: 14px;
+            line-height: 20px;
+            color: #666666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #f5f5f5;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #1890ff;
+            color: #1890ff;
+            background-color: #ffffff;
+        }
+
+        /* 中列内容 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            border-radius: 4px;
+            padding: 16px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 28px;
+            margin-bottom: 5px;
+        }
+
+        .stat-text {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+        }
+
+        .announcement-tabs .tabs {
+            border-radius: 4px 4px 0 0;
+            margin-top: 8px;
+        }
+
+        .announcement-list {
+            list-style-type: none;
+        }
+
+        .announcement-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .announcement-title {
+            font-size: 14px;
+            color: #333333;
+            cursor: pointer;
+            transition: color 0.3s;
+            max-width: 80%;
+        }
+
+        .announcement-title:hover {
+            color: #1890ff;
+        }
+
+        .announcement-date {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+            margin-bottom: 10px;
+        }
+
+        .unread-count {
+            color: #f5222d;
+            font-weight: 500;
+        }
+
+        .inbox-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .inbox-title {
+            font-weight: 500;
+            color: #333333;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .inbox-title:hover {
+            color: #1890ff;
+        }
+
+        .inbox-info {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        /* 右列内容 */
+        .user-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 8px 0 4px;
+        }
+
+        .user-position {
+            color: #666666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .user-quote {
+            font-style: italic;
+            color: #999999;
+            font-size: 12px;
+        }
+
+        .navigation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .nav-button {
+            height: 80px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-button i {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .schedule-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .calendar-header {
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            color: #333333;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 8px 0;
+            font-size: 12px;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        .no-data {
+            padding: 24px;
+            text-align: center;
+            color: #999999;
+            font-size: 14px;
+        }
+
+        /* 流程入口区域 */
+        .workflow-section {
+            margin-top: 24px;
+            padding: 0 24px;
+            max-width: 1920px;
+            margin: 0 auto 40px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 16px;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+        }
+
+        .workflow-item {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .workflow-item:hover {
+            border-color: #1890ff;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .workflow-item i {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #4dabf7;
+        }
+
+        .workflow-item span {
+            font-size: 13px;
+            color: #444;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-wrap: wrap;
+            }
+            
+            .left-column, .middle-column, .right-column {
+                width: 100%;
+            }
+            
+            .right-column {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .user-section, .navigation-section, .schedule-section {
+                width: 48%;
+            }
+            
+            .workflow-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .workflow-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .right-column {
+                flex-direction: column;
+            }
+            
+            .user-section, .navigation-section, .schedule-section {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            
+            .workflow-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .nav-icons {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .workflow-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-nav">
+        <div class="logo">FleOffice</div>
+        <div class="nav-menu">
+            <a href="#">门户</a>
+            <a href="#">事务审批</a>
+            <a href="#">公文管理</a>
+            <a href="#">督查督办</a>
+            <a href="#">信息管理</a>
+            <a href="#">日程管理</a>
+            <a href="#">车辆管理</a>
+            <a href="#">会议管理</a>
+            <a href="#">考勤管理</a>
+            <a href="#">更多</a>
+        </div>
+        <div class="nav-icons">
+            <div class="nav-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">99+</span>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-envelope"></i>
+                <span class="badge">18</span>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-comment-alt"></i>
+                <span class="badge">99+</span>
+            </div>
+            <div class="user-info">
+                <div class="avatar">周</div>
+                <span>周胜安</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区 -->
+    <div class="main-content">
+        <!-- 左侧栏 -->
+        <div class="left-column">
+            <!-- 图片轮播 -->
+            <div class="card">
+                <div class="carousel">
+                    新仓新绘新篇——齐齐哈尔阳光热力...
+                </div>
+            </div>
+            
+            <!-- 新闻列表 -->
+            <div class="card">
+                <div class="card-header">新闻动态</div>
+                <div class="card-body">
+                    <ul class="news-list">
+                        <li class="news-item">
+                            <div class="news-title">大众汽车集团管理董事、首席财务官安迈志一行来肥参访</div>
+                            <div class="news-content">10月11日，大众汽车集团管理董事、首席财务官安迈志一行来肥参访，并出席有关推介会。中国科大校长包信和，市长罗云峰分别陪同并出席活动。大众汽车集团管理董事柯利安...</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">轨道交通第四期建设规划环评第二次公众意见征询开始</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">8月第一周考勤明细</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">水稻接种"疫苗"促增收</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">安徽高招本科第二批院校投档分数及名次公布</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 学习体会 -->
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active">学习体会</div>
+                    <div class="tab">党务公开</div>
+                </div>
+                <div class="card-body">
+                    <ul class="news-list">
+                        <li class="news-item">
+                            <div class="news-title">中国共产党机构编制工作条例</div>
+                            <div class="news-content">05:27</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">营造更好发展环境支持民营企业改革发展</div>
+                            <div class="news-content">11:30</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">吉林桦甸：全域旅游推动全面小康</div>
+                            <div class="news-content">11:07</div>
+                        </li>
+                        <li class="news-item">
+                            <div class="news-title">海外网评：共享中国机遇，进博"朋友圈"持续扩容</div>
+                            <div class="news-content">11:07</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中间栏 -->
+        <div class="middle-column">
+            <!-- 统计卡片 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-card" style="background-color: #FF7B4A;">
+                            <div class="stat-number">99+</div>
+                            <div class="stat-text">待办文件</div>
+                        </div>
+                        <div class="stat-card" style="background-color: #56C4C5;">
+                            <div class="stat-number">13</div>
+                            <div class="stat-text">待阅文件</div>
+                        </div>
+                        <div class="stat-card" style="background-color: #A071FF;">
+                            <div class="stat-number">99+</div>
+                            <div class="stat-text">已办文件</div>
+                        </div>
+                        <div class="stat-card" style="background-color: #4D9EF7;">
+                            <div class="stat-number">51</div>
+                            <div class="stat-text">已阅文件</div>
+                        </div>
+                        <div class="stat-card" style="background-color: #56D8A6;">
+                            <div class="stat-number">99+</div>
+                            <div class="stat-text">我的文件</div>
+                        </div>
+                        <div class="stat-card" style="background-color: #FFA84A;">
+                            <div class="stat-number">26</div>
+                            <div class="stat-text">未读邮件</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 公告 -->
+            <div class="card">
+                <div class="announcement-tabs">
+                    <div class="tabs">
+                        <div class="tab active">集团公告</div>
+                        <div class="tab">工作动态</div>
+                        <div class="tab">通知公告</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="announcement-list">
+                        <li class="announcement-item">
+                            <div class="announcement-title">大众汽车集团管理董事、首席财务官安迈志一行来肥参访</div>
+                            <div class="announcement-date">2023-10-12</div>
+                        </li>
+                        <li class="announcement-item">
+                            <div class="announcement-title">轨道交通第四期建设规划环评第二次公众意见征询开始</div>
+                            <div class="announcement-date">2023-08-18</div>
+                        </li>
+                        <li class="announcement-item">
+                            <div class="announcement-title">8月第一周考勤明细</div>
+                            <div class="announcement-date">2023-08-02</div>
+                        </li>
+                        <li class="announcement-item">
+                            <div class="announcement-title">水稻接种"疫苗"促增收</div>
+                            <div class="announcement-date">2023-08-02</div>
+                        </li>
+                        <li class="announcement-item">
+                            <div class="announcement-title">安徽高招本科第二批院校投档分数及名次公布</div>
+                            <div class="announcement-date">2023-02-06</div>
+                        </li>
+                        <li class="announcement-item">
+                            <div class="announcement-title">杜苏芮逼近！合肥交通启动防台风IV级应急响应</div>
+                            <div class="announcement-date">2023-01-05</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 收件箱 -->
+            <div class="card">
+                <div class="inbox-header">
+                    <div class="card-header">收件箱</div>
+                    <div class="unread-count">未读(26)</div>
+                </div>
+                <div class="card-body">
+                    <div class="inbox-item">
+                        <div class="inbox-title">每周四OA技术例会</div>
+                        <div class="inbox-info">杨玉晴 07-24</div>
+                    </div>
+                    <div class="inbox-item">
+                        <div class="inbox-title">每周四OA技术例会</div>
+                        <div class="inbox-info">杨玉晴 07-17</div>
+                    </div>
+                    <div class="inbox-item">
+                        <div class="inbox-title">每周四OA技术例会</div>
+                        <div class="inbox-info">杨玉晴 07-10</div>
+                    </div>
+                    <div class="inbox-item">
+                        <div class="inbox-title">每周四OA技术例会</div>
+                        <div class="inbox-info">杨玉晴 07-03</div>
+                    </div>
+                    <div class="inbox-item">
+                        <div class="inbox-title">每周四OA技术例会</div>
+                        <div class="inbox-info">杨玉晴 06-26</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧栏 -->
+        <div class="right-column">
+            <!-- 用户信息 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="user-card">
+                        <div class="avatar" style="width: 60px; height: 60px; font-size: 24px;">周</div>
+                        <div class="user-name">周胜安</div>
+                        <div class="user-position">办公室文书</div>
+                        <div class="user-quote">细节决定成败</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统导航 -->
+            <div class="card">
+                <div class="card-header">系统导航</div>
+                <div class="card-body">
+                    <div class="navigation-grid">
+                        <div class="nav-button" style="background-color: #1890FF;">
+                            <i class="fas fa-file-contract"></i>
+                            <span>公文智库</span>
+                        </div>
+                        <div class="nav-button" style="background-color: #00BFA5;">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>三方系统</span>
+                        </div>
+                        <div class="nav-button" style="background-color: #F5222D;">
+                            <i class="fas fa-building"></i>
+                            <span>万户内部系统</span>
+                        </div>
+                        <div class="nav-button" style="background-color: #7B68EE;">
+                            <i class="fas fa-tv"></i>
+                            <span>售前演示环境</span>
+                        </div>
+                        <div class="nav-button" style="background-color: #1976D2;">
+                            <i class="fas fa-flask"></i>
+                            <span>化学学报</span>
+                        </div>
+                        <div class="nav-button" style="background-color: #DC3545;">
+                            <i class="fas fa-book"></i>
+                            <span>吉大学报</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 日程安排 -->
+            <div class="card">
+                <div class="card-header">日程安排</div>
+                <div class="card-body">
+                    <div class="schedule-calendar">
+                        <div class="calendar-header">周一</div>
+                        <div class="calendar-header">周二</div>
+                        <div class="calendar-header">周三</div>
+                        <div class="calendar-header">周四</div>
+                        <div class="calendar-header">周五</div>
+                        <div class="calendar-header">周六</div>
+                        <div class="calendar-header">周日</div>
+                        
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                        <div class="calendar-day">07.2</div>
+                    </div>
+                    <div class="no-data">暂无数据</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 业务流程入口 -->
+    <div class="workflow-section">
+        <div class="section-title">业务流程入口</div>
+        <div class="workflow-grid" id="workflow-container">
+            <!-- 流程入口会通过JS动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 业务流程入口数据
+        const workflows = [
+            {name: "用工申请", icon: "fa-user-plus"},
+            {name: "员工部门（岗位）调整审批", icon: "fa-exchange-alt"},
+            {name: "借用人员审批", icon: "fa-user-friends"},
+            {name: "员工转正考核审批", icon: "fa-user-check"},
+            {name: "劳动合同期满考核", icon: "fa-file-contract"},
+            {name: "劳动合同（聘用协议）期满审批", icon: "fa-file-signature"},
+            {name: "录用人员审批表", icon: "fa-user-tie"},
+            {name: "员工个人信息表", icon: "fa-id-card"},
+            {name: "解除劳动合同通知书审批单", icon: "fa-user-minus"},
+            {name: "员工绩效申诉表", icon: "fa-chart-line"},
+            {name: "专项考核单", icon: "fa-clipboard-check"},
+            {name: "离职审批", icon: "fa-sign-out-alt"},
+            {name: "请假申请", icon: "fa-calendar-minus"},
+            {name: "出差申请", icon: "fa-plane"},
+            {name: "离宁申请", icon: "fa-map-marked-alt"},
+            {name: "医疗期复工申请", icon: "fa-procedures"},
+            {name: "岗位设置变更审批", icon: "fa-user-cog"},
+            {name: "岗位编制调整审批", icon: "fa-users-cog"},
+            {name: "岗位任职资格等级评定申请", icon: "fa-user-graduate"},
+            {name: "岗位任职资格标准修订审批", icon: "fa-user-edit"},
+            {name: "岗位说明书修订审批", icon: "fa-file-edit"},
+            {name: "培训需求审批", icon: "fa-chalkboard-teacher"},
+            {name: "临时培训需求审批", icon: "fa-chalkboard"},
+            {name: "培训计划审批", icon: "fa-calendar-check"},
+            {name: "专项奖励审批", icon: "fa-award"},
+            {name: "合同查询/复印审批", icon: "fa-search"},
+            {name: "合同（协议）审批", icon: "fa-file-signature"},
+            {name: "资料查（借）阅、复印审批", icon: "fa-file-download"},
+            {name: "档案销毁申请", icon: "fa-trash-alt"},
+            {name: "法人（法人代表）身份证外借登记表", icon: "fa-id-badge"},
+            {name: "评标小组成员审批", icon: "fa-gavel"},
+            {name: "处理废旧、闲置物资价格审定价方式变更审批", icon: "fa-recycle"},
+            {name: "立项审批", icon: "fa-project-diagram"},
+            {name: "询比价审批", icon: "fa-search-dollar"},
+            {name: "独家谈判审批", icon: "fa-handshake"},
+            {name: "招标对外发布审批", icon: "fa-bullhorn"},
+            {name: "低值易耗品采购申请", icon: "fa-shopping-cart"},
+            {name: "物资采购申请", icon: "fa-boxes"},
+            {name: "设备采购申请", icon: "fa-laptop"},
+            {name: "固定资产采购申请", icon: "fa-building"},
+            {name: "网络（固话）业务办理申请", icon: "fa-network-wired"},
+            {name: "管理标准制（修）订审批", icon: "fa-clipboard-list"},
+            {name: "请示汇报", icon: "fa-comment-alt"},
+            {name: "电子公告发布审批", icon: "fa-bullhorn"},
+            {name: "新闻报道发布审批", icon: "fa-newspaper"},
+            {name: "刻章印章申请", icon: "fa-stamp"},
+            {name: "印章使用申请", icon: "fa-stamp"},
+            {name: "印章外借申请", icon: "fa-stamp"},
+            {name: "介绍信用印审批", icon: "fa-envelope-open-text"},
+            {name: "资产维修申报", icon: "fa-tools"},
+            {name: "资产调拨申请", icon: "fa-exchange-alt"},
+            {name: "资产处置申请", icon: "fa-trash-restore"},
+            {name: "物资搬运申请", icon: "fa-truck-loading"},
+            {name: "资产入库", icon: "fa-warehouse"},
+            {name: "资产出库", icon: "fa-dolly"},
+            {name: "资产报废审批", icon: "fa-trash"},
+            {name: "财务资料查（借）阅审批", icon: "fa-file-invoice-dollar"},
+            {name: "资金（经费）审核审批", icon: "fa-money-bill-wave"},
+            {name: "借款审批单", icon: "fa-hand-holding-usd"},
+            {name: "差旅费报销单", icon: "fa-receipt"},
+            {name: "工程款支付申请", icon: "fa-file-invoice"},
+            {name: "工程立项审批", icon: "fa-hammer"},
+            {name: "合格供应商审查表", icon: "fa-clipboard-check"},
+            {name: "合格供应商退库（暂停）审核", icon: "fa-clipboard-list"},
+            {name: "供应商审验表", icon: "fa-user-tag"}
+        ];
+        
+        // 生成业务流程入口
+        document.addEventListener('DOMContentLoaded', function() {
+            const workflowContainer = document.getElementById('workflow-container');
+            
+            workflows.forEach(workflow => {
+                const workflowItem = document.createElement('div');
+                workflowItem.className = 'workflow-item';
+                workflowItem.innerHTML = `
+                    <i class="fas ${workflow.icon}"></i>
+                    <span>${workflow.name}</span>
+                `;
+                
+                workflowItem.addEventListener('click', function() {
+                    alert(`打开流程: ${workflow.name}`);
+                });
+                
+                workflowContainer.appendChild(workflowItem);
+            });
+        });
+    </script>
+</body>
+</html>

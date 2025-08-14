@@ -751,17 +751,50 @@ const initNextAssigneesFormField = async () => {
     taskId: runningTask.value.id,
     processVariablesStr: JSON.stringify(variables)
   })
+  
+  console.log('获取到的下一个审批节点:', data)
+  
   if (data && data.length > 0) {
     data.forEach((node: any) => {
-      if (
-        // 情况一：当前节点没有审批人，并且是发起人自选
-        (isEmpty(node.tasks) &&
-          isEmpty(node.candidateUsers) &&
-          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
-        // 情况二：当前节点是审批人自选
-        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
-      ) {
+      console.log('处理节点:', {
+        name: node.name,
+        candidateStrategy: node.candidateStrategy,
+        tasks: node.tasks,
+        candidateUsers: node.candidateUsers
+      })
+      // 检查是否是发起人自选节点，且已经有审批人（说明在流程发起时已经选择过了）
+      const isStartUserSelectWithAssignees = CandidateStrategy.START_USER_SELECT === node.candidateStrategy && 
+        (!isEmpty(node.tasks) || !isEmpty(node.candidateUsers));
+      
+      // 检查是否是审批人自选节点
+      const isApproveUserSelect = CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy;
+      
+      // 检查是否是发起人自选节点，但没有审批人（需要现在选择）
+      const isStartUserSelectWithoutAssignees = CandidateStrategy.START_USER_SELECT === node.candidateStrategy && 
+        isEmpty(node.tasks) && isEmpty(node.candidateUsers);
+      
+      if (isApproveUserSelect || isStartUserSelectWithoutAssignees) {
+        // 只有审批人自选节点，或者发起人自选但没有审批人的节点才需要选择
+        console.log('需要选择审批人的节点:', node.name, {
+          isApproveUserSelect,
+          isStartUserSelectWithoutAssignees,
+          candidateUserIds: node.candidateUserIds,
+          candidateUsers: node.candidateUsers
+        })
         nextAssigneesActivityNode.value.push(node)
+      } else if (isStartUserSelectWithAssignees) {
+        // 发起人自选且有审批人的节点，不需要再次选择
+        console.log('跳过已选择审批人的发起人自选节点:', node.name, {
+          tasks: node.tasks,
+          candidateUsers: node.candidateUsers,
+          candidateUserIds: node.candidateUserIds
+        })
+      } else {
+        console.log('其他类型节点:', node.name, {
+          candidateStrategy: node.candidateStrategy,
+          candidateUserIds: node.candidateUserIds,
+          candidateUsers: node.candidateUsers
+        })
       }
     })
   }

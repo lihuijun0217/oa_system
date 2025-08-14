@@ -20,6 +20,7 @@ export type ProcessInstanceVO = {
   createTime: string
   endTime: string
   processDefinition?: ProcessDefinitionVO
+  formVariables?: Map<string, any>
 }
 
 // 用户信息
@@ -82,6 +83,17 @@ export const cancelProcessInstanceByAdmin = async (id: number, reason: string) =
 
 export const getProcessInstance = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get?id=' + id })
+}
+
+// 基于前流程发起新流程
+export const createProcessInstanceFromSource = async (params: {
+  sourceProcessInstanceId: string
+  targetProcessDefinitionKey: string
+}) => {
+  return await request.post({ 
+    url: '/bpm/process-instance/create-from-source', 
+    params: params 
+  })
 }
 
 export const getProcessInstanceCopyPage = async (params: any) => {

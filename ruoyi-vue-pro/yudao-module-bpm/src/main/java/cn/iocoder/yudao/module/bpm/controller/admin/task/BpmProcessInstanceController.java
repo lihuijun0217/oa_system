@@ -124,6 +124,15 @@ public class BpmProcessInstanceController {
         return success(processInstanceService.createProcessInstance(getLoginUserId(), createReqVO));
     }
 
+    @PostMapping("/create-from-source")
+    @Operation(summary = "基于前流程发起新流程")
+    @PreAuthorize("@ss.hasPermission('bpm:process-instance:create')")
+    public CommonResult<String> createProcessInstanceFromSource(
+            @RequestParam("sourceProcessInstanceId") String sourceProcessInstanceId,
+            @RequestParam("targetProcessDefinitionKey") String targetProcessDefinitionKey) {
+        return success(processInstanceService.createProcessInstanceFromSource(getLoginUserId(), sourceProcessInstanceId, targetProcessDefinitionKey));
+    }
+
     @GetMapping("/get")
     @Operation(summary = "获得指定流程实例", description = "在【流程详细】界面中，进行调用")
     @Parameter(name = "id", description = "流程实例的编号", required = true)

@@ -296,6 +296,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
         })
       },
       {
+        path: 'process-chain/select',
+        component: () => import('@/views/bpm/processChain/ProcessChainSelect.vue'),
+        name: 'BpmProcessChainSelect',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '选择后续流程',
+          activeMenu: '/bpm/process-instance'
+        }
+      },
+      {
         path: 'process-instance/report',
         component: () => import('@/views/bpm/processInstance/report/index.vue'),
         name: 'BpmProcessInstanceReport',

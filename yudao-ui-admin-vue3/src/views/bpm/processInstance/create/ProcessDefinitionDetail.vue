@@ -144,27 +144,49 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
       }
       
       // 检查是否包含下划线（如_signature、_rq、_img等）
+      // 但需要保留正常的表单字段，只删除签名字段等特殊字段
       if (key.includes('_')) {
-        fieldsToRemove.add(key)
-        // 同时标记对应的基础字段也要删除
-        const baseField = key.split('_')[0]
-        fieldsToRemove.add(baseField)
-        continue
+        // 检查是否是签名字段等特殊字段
+        const isSignatureField = key.endsWith('_signature') || 
+                                key.endsWith('_rq') || 
+                                key.endsWith('_img') ||
+                                key.endsWith('_date') ||
+                                key.endsWith('_time');
+        
+        if (isSignatureField) {
+          fieldsToRemove.add(key)
+          // 同时标记对应的基础字段也要删除
+          const baseField = key.split('_')[0]
+          fieldsToRemove.add(baseField)
+          continue
+        }
+        // 如果不是签名字段，保留这个字段（如 lb_xh_1, lb_xh_2 等）
       }
       
       // 检查是否为基础字段，且存在对应的下划线字段
-      const hasUnderscoreField = Object.keys(formVariables).some(field => 
-        field.startsWith(key + '_')
-      )
+      // 但需要排除正常的表单字段
+      const hasUnderscoreField = Object.keys(formVariables).some(field => {
+        if (!field.startsWith(key + '_')) return false;
+        
+        // 检查是否是签名字段等特殊字段
+        return field.endsWith('_signature') || 
+               field.endsWith('_rq') || 
+               field.endsWith('_img') ||
+               field.endsWith('_date') ||
+               field.endsWith('_time');
+      });
+      
       if (hasUnderscoreField) {
         fieldsToRemove.add(key)
       }
     }
     
     // 删除需要移除的字段
+    console.log('需要删除的字段:', Array.from(fieldsToRemove))
     for (const field of fieldsToRemove) {
       delete formVariables[field]
     }
+    console.log('过滤后的表单变量:', formVariables)
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
 
     await nextTick()

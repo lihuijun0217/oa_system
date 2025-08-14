@@ -204,6 +204,16 @@
           <el-button link type="primary" v-else @click="handleCreate(scope.row)">
             重新发起
           </el-button>
+          <!-- 发起后续流程按钮 -->
+          <el-button 
+            v-if="scope.row.status === 2 && hasNextProcesses(scope.row)" 
+            link 
+            type="success" 
+            @click="handleStartNextProcess(scope.row)"
+            v-hasPermi="['bpm:process-instance:create']"
+          >
+            发起后续流程
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -225,6 +235,8 @@ import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { BpmProcessInstanceStatus } from '@/utils/constants'
+import * as ProcessChainApi from '@/api/bpm/processChain'
+import { usePageRefresh } from '@/hooks/web/usePageRefresh'
 
 defineOptions({ name: 'BpmProcessInstanceMy' })
 
@@ -236,6 +248,7 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const processDefinitionList = ref<any[]>([]) // 流程定义列表
+const processChainsMap = ref<Map<string, any[]>>(new Map()) // 流程串联关系映射
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -256,6 +269,12 @@ const getList = async () => {
     const data = await ProcessInstanceApi.getProcessInstanceMyPage(queryParams)
     list.value = data.list
     total.value = data.total
+    
+    // 添加数据结构检查，帮助排查问题
+    if (data.list && data.list.length > 0) {
+      console.log('流程实例数据结构示例:', data.list[0])
+      console.log('流程实例字段:', Object.keys(data.list[0]))
+    }
   } finally {
     loading.value = false
   }
@@ -318,6 +337,119 @@ const handleCancel = async (row: ProcessInstanceVO) => {
   await getList()
 }
 
+/** 发起后续流程操作 */
+const handleStartNextProcess = async (row: ProcessInstanceVO) => {
+  try {
+    // 提取流程定义的key部分
+    const processDefinitionKey = row.processDefinitionId?.split(':')[0]
+    if (!processDefinitionKey) {
+      message.error('无法获取流程定义标识')
+      return
+    }
+    
+    // 跳转到后续流程选择页面
+    await router.push({
+      name: 'BpmProcessChainSelect',
+      query: { 
+        sourceProcessInstanceId: row.id,
+        sourceProcessKey: processDefinitionKey
+      }
+    })
+  } catch (error) {
+    console.error('跳转失败:', error)
+    message.error('跳转失败: ' + error)
+  }
+}
+
+/** 判断是否有后续流程 */
+const hasNextProcesses = (row: ProcessInstanceVO) => {
+  const processDefinitionId = row.processDefinitionId
+  if (!processDefinitionId) {
+    console.log('流程实例缺少processDefinitionId:', row)
+    return false
+  }
+  
+  // 提取流程定义的key部分（去掉版本和ID后缀）
+  // 例如：cg_wzsq:4:e02b8d73-7851-11f0-844e-00155d007200 -> cg_wzsq
+  const processDefinitionKey = processDefinitionId.split(':')[0]
+  
+  const nextProcesses = processChainsMap.value.get(processDefinitionKey)
+  const hasNext = nextProcesses && nextProcesses.length > 0
+  
+  // 添加调试信息
+  if (row.status === 2) { // 只对已完成的流程输出调试信息
+    console.log(`流程 ${processDefinitionKey} 的后续流程检查:`, {
+      originalProcessDefinitionId: processDefinitionId,
+      extractedProcessDefinitionKey: processDefinitionKey,
+      hasNext,
+      nextProcessesCount: nextProcesses ? nextProcesses.length : 0,
+      nextProcesses,
+      availableKeys: Array.from(processChainsMap.value.keys())
+    })
+  }
+  
+  return hasNext
+}
+
+/** 获取流程串联关系 */
+const getProcessChains = async (retryCount = 0) => {
+  try {
+    // 分批获取所有启用的流程串联关系
+    let allChains: any[] = []
+    let pageNo = 1
+    const pageSize = 100
+    
+    while (true) {
+      const response = await ProcessChainApi.getProcessChainPageApi({
+        pageNo,
+        pageSize,
+        enabled: true
+      })
+      
+      if (response.list && response.list.length > 0) {
+        allChains = allChains.concat(response.list)
+        pageNo++
+        
+        // 如果返回的数据少于pageSize，说明已经获取完所有数据
+        if (response.list.length < pageSize) {
+          break
+        }
+      } else {
+        break
+      }
+    }
+    
+    // 按源流程分组
+    const chainsMap = new Map<string, any[]>()
+    allChains.forEach((chain: any) => {
+      const sourceKey = chain.sourceProcessKey
+      if (!chainsMap.has(sourceKey)) {
+        chainsMap.set(sourceKey, [])
+      }
+      chainsMap.get(sourceKey)!.push(chain)
+    })
+    
+    processChainsMap.value = chainsMap
+    console.log(`成功获取 ${allChains.length} 条流程串联关系`)
+    console.log('流程串联关系映射:', Object.fromEntries(chainsMap))
+    console.log('可用的源流程key:', Array.from(chainsMap.keys()))
+  } catch (error) {
+    console.error('获取流程串联关系失败:', error)
+    
+    // 重试机制
+    if (retryCount < 3) {
+      console.log(`第 ${retryCount + 1} 次重试获取流程串联关系...`)
+      setTimeout(() => {
+        getProcessChains(retryCount + 1)
+      }, 1000 * (retryCount + 1)) // 递增延迟
+    } else {
+      console.error('获取流程串联关系失败，已达到最大重试次数')
+      // 如果获取失败，设置为空Map，避免影响其他功能
+      processChainsMap.value = new Map()
+    }
+  }
+}
+
 /** 激活时 **/
 onActivated(() => {
   getList()
@@ -325,9 +457,25 @@ onActivated(() => {
 
 /** 初始化 **/
 onMounted(async () => {
-  await getList()
-  categoryList.value = await CategoryApi.getCategorySimpleList()
-  // 获取流程定义列表
-  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
+  try {
+    // 首先获取流程串联关系，确保在渲染列表之前就准备好
+    await getProcessChains()
+    
+    // 然后获取流程实例列表
+    await getList()
+    
+    // 最后获取其他数据
+    categoryList.value = await CategoryApi.getCategorySimpleList()
+    processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
+  } catch (error) {
+    console.error('初始化失败:', error)
+  }
+})
+
+// 使用页面自动刷新功能
+usePageRefresh(() => {
+  console.log('流程实例列表页面自动刷新')
+  getList()
+  getProcessChains()
 })
 </script>

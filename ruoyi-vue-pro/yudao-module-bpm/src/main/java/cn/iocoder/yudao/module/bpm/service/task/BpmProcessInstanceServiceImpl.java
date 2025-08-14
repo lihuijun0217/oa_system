@@ -39,6 +39,7 @@ import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.FlowableUtils;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.util.SimpleModelUtils;
 import cn.iocoder.yudao.module.bpm.service.definition.BpmProcessDefinitionService;
 import cn.iocoder.yudao.module.bpm.service.message.BpmMessageService;
+import cn.iocoder.yudao.module.bpm.service.definition.BpmProcessChainService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -66,6 +67,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception0;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.bpm.controller.admin.task.vo.instance.BpmApprovalDetailRespVO.ActivityNode;
 import static cn.iocoder.yudao.module.bpm.enums.ErrorCodeConstants.*;
@@ -119,6 +121,9 @@ public class BpmProcessInstanceServiceImpl implements BpmProcessInstanceService 
 
     @Resource
     private BpmProcessIdRedisDAO processIdRedisDAO;
+
+    @Resource
+    private BpmProcessChainService processChainService;
 
     // ========== Query 查询相关方法 ==========
 
@@ -264,27 +269,32 @@ public class BpmProcessInstanceServiceImpl implements BpmProcessInstanceService 
         // 3. 获取下一个将要执行的节点集合
         FlowElement flowElement = bpmnModel.getFlowElement(task.getTaskDefinitionKey());
         List<FlowNode> nextFlowNodes = BpmnModelUtils.getNextFlowNodes(flowElement, bpmnModel, processVariables);
-        List<ActivityNode> nextActivityNodes = convertList(nextFlowNodes, node -> new ActivityNode().setId(node.getId())
-                .setName(node.getName()).setNodeType(BpmSimpleModelNodeTypeEnum.APPROVE_NODE.getType())
-                .setStatus(BpmTaskStatusEnum.RUNNING.getStatus())
-                .setCandidateStrategy(BpmnModelUtils.parseCandidateStrategy(node))
-                .setCandidateUserIds(getTaskCandidateUserList(bpmnModel, node.getId(),
-                        loginUserId, historicProcessInstance.getProcessDefinitionId(), processVariables)));
-        if (CollUtil.isNotEmpty(nextActivityNodes)) {
-            return nextActivityNodes;
-        }
+        List<ActivityNode> nextActivityNodes = convertList(nextFlowNodes, node -> {
+            List<Long> candidateUserIds = getTaskCandidateUserList(bpmnModel, node.getId(),
+                    loginUserId, historicProcessInstance.getProcessDefinitionId(), processVariables);
+            
+            log.info("节点 {} 的候选用户ID: {}", node.getName(), candidateUserIds);
+            
+            return new ActivityNode().setId(node.getId())
+                    .setName(node.getName()).setNodeType(BpmSimpleModelNodeTypeEnum.APPROVE_NODE.getType())
+                    .setStatus(BpmTaskStatusEnum.RUNNING.getStatus())
+                    .setCandidateStrategy(BpmnModelUtils.parseCandidateStrategy(node))
+                    .setCandidateUserIds(candidateUserIds);
+        });
 
         // 4. 拼接基础信息
-        Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(
-                convertSetByFlatMap(nextActivityNodes, ActivityNode::getCandidateUserIds, Collection::stream));
-        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(userMap.values(), AdminUserRespDTO::getDeptId));
-        nextActivityNodes.forEach(node -> node.setCandidateUsers(convertList(node.getCandidateUserIds(), userId -> {
-            AdminUserRespDTO user = userMap.get(userId);
-            if (user != null) {
-                return BpmProcessInstanceConvert.INSTANCE.buildUser(userId, userMap, deptMap);
-            }
-            return null;
-        })));
+        if (CollUtil.isNotEmpty(nextActivityNodes)) {
+            Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(
+                    convertSetByFlatMap(nextActivityNodes, ActivityNode::getCandidateUserIds, Collection::stream));
+            Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(userMap.values(), AdminUserRespDTO::getDeptId));
+            nextActivityNodes.forEach(node -> node.setCandidateUsers(convertList(node.getCandidateUserIds(), userId -> {
+                AdminUserRespDTO user = userMap.get(userId);
+                if (user != null) {
+                    return BpmProcessInstanceConvert.INSTANCE.buildUser(userId, userMap, deptMap);
+                }
+                return null;
+            })));
+        }
         return nextActivityNodes;
     }
 
@@ -721,6 +731,42 @@ public class BpmProcessInstanceServiceImpl implements BpmProcessInstanceService 
                     createReqDTO.getBusinessKey(),
                     createReqDTO.getStartUserSelectAssignees());
         });
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String createProcessInstanceFromSource(Long userId, String sourceProcessInstanceId, String targetProcessDefinitionKey) {
+        // 1. 校验源流程实例存在且已通过
+        HistoricProcessInstance sourceInstance = getHistoricProcessInstance(sourceProcessInstanceId);
+        if (sourceInstance == null) {
+            throw exception(PROCESS_INSTANCE_NOT_EXISTS);
+        }
+        
+        // 检查源流程状态是否为已通过
+        Integer sourceStatus = FlowableUtils.getProcessInstanceStatus(sourceInstance);
+        if (!BpmProcessInstanceStatusEnum.APPROVE.getStatus().equals(sourceStatus)) {
+            throw exception0(1001003, "源流程实例未通过，无法发起后续流程");
+        }
+        
+        // 2. 获取目标流程定义
+        ProcessDefinition targetDefinition = processDefinitionService.getActiveProcessDefinition(targetProcessDefinitionKey);
+        if (targetDefinition == null) {
+            throw exception(PROCESS_DEFINITION_NOT_EXISTS);
+        }
+        
+        // 3. 获取源流程变量
+        Map<String, Object> sourceVariables = sourceInstance.getProcessVariables();
+        if (sourceVariables == null) {
+            sourceVariables = new HashMap<>();
+        }
+        
+        // 4. 根据串联流程配置生成目标流程变量
+        String sourceProcessKey = sourceInstance.getProcessDefinitionKey();
+        Map<String, Object> targetVariables = processChainService.generateTargetProcessVariables(
+                sourceProcessKey, targetProcessDefinitionKey, sourceVariables);
+        
+        // 5. 发起目标流程
+        return createProcessInstance0(userId, targetDefinition, targetVariables, null, null);
     }
 
     private String createProcessInstance0(Long userId, ProcessDefinition definition,
