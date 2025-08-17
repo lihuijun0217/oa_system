@@ -2294,6 +2294,70 @@ INSERT INTO `system_notice` (`id`, `title`, `content`, `type`, `status`, `creato
 COMMIT;
 
 -- ----------------------------
+-- Table structure for system_news
+-- ----------------------------
+DROP TABLE IF EXISTS `system_news`;
+CREATE TABLE `system_news`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '新闻ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '新闻标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '新闻内容',
+  `type` tinyint NOT NULL COMMENT '新闻类型（1图片新闻 2文字新闻）',
+  `image_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '图片URL',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '新闻状态（0草稿 1已发布 2已下架）',
+  `publish_time` datetime NULL DEFAULT NULL COMMENT '发布时间',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '新闻表';
+
+-- ----------------------------
+-- Records of system_news
+-- ----------------------------
+BEGIN;
+INSERT INTO `system_news` (`id`, `title`, `content`, `type`, `image_url`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (1, '公司年度总结大会圆满召开', '公司年度总结大会圆满召开，回顾过去一年的成就，展望未来发展...', 1, 'https://via.placeholder.com/400x200/409EFF/FFFFFF?text=年度总结大会', 1, '2024-01-15 10:00:00', 'admin', '2024-01-15 10:00:00', 'admin', '2024-01-15 10:00:00', b'0', 1);
+INSERT INTO `system_news` (`id`, `title`, `content`, `type`, `image_url`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (2, '新员工入职培训活动', '新员工入职培训活动顺利开展，帮助新员工快速融入团队...', 1, 'https://via.placeholder.com/400x200/67C23A/FFFFFF?text=新员工培训', 1, '2024-01-14 14:30:00', 'admin', '2024-01-14 14:30:00', 'admin', '2024-01-14 14:30:00', b'0', 1);
+INSERT INTO `system_news` (`id`, `title`, `content`, `type`, `image_url`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (3, '技术创新成果展示', '公司技术创新成果展示活动，展示最新的技术突破...', 1, 'https://via.placeholder.com/400x200/F56C6C/FFFFFF?text=技术创新', 1, '2024-01-13 09:15:00', 'admin', '2024-01-13 09:15:00', 'admin', '2024-01-13 09:15:00', b'0', 1);
+INSERT INTO `system_news` (`id`, `title`, `content`, `type`, `image_url`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (4, '关于加强安全生产管理的通知', '为进一步加强安全生产管理，确保员工生命财产安全...', 2, NULL, 1, '2024-01-12 16:45:00', 'admin', '2024-01-12 16:45:00', 'admin', '2024-01-12 16:45:00', b'0', 1);
+INSERT INTO `system_news` (`id`, `title`, `content`, `type`, `image_url`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (5, '2024年度工作计划发布', '2024年度工作计划正式发布，明确了今年的工作重点和目标...', 2, NULL, 1, '2024-01-11 11:20:00', 'admin', '2024-01-11 11:20:00', 'admin', '2024-01-11 11:20:00', b'0', 1);
+COMMIT;
+
+-- ----------------------------
+-- Table structure for system_regulation
+-- ----------------------------
+DROP TABLE IF EXISTS `system_regulation`;
+CREATE TABLE `system_regulation`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '规章制度ID',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '规章制度标题',
+  `file_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件名',
+  `file_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件URL',
+  `file_size` bigint NULL DEFAULT NULL COMMENT '文件大小（字节）',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0草稿 1已发布 2已下架）',
+  `publish_time` datetime NULL DEFAULT NULL COMMENT '发布时间',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '规章制度表';
+
+-- ----------------------------
+-- Records of system_regulation
+-- ----------------------------
+BEGIN;
+INSERT INTO `system_regulation` (`id`, `title`, `file_name`, `file_url`, `file_size`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (1, '员工手册', '员工手册.pdf', '/uploads/regulations/员工手册.pdf', 2621440, 1, '2024-01-15 10:00:00', 'admin', '2024-01-15 10:00:00', 'admin', '2024-01-15 10:00:00', b'0', 1);
+INSERT INTO `system_regulation` (`id`, `title`, `file_name`, `file_url`, `file_size`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (2, '安全生产管理制度', '安全生产管理制度.pdf', '/uploads/regulations/安全生产管理制度.pdf', 1887436, 1, '2024-01-14 14:30:00', 'admin', '2024-01-14 14:30:00', 'admin', '2024-01-14 14:30:00', b'0', 1);
+INSERT INTO `system_regulation` (`id`, `title`, `file_name`, `file_url`, `file_size`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (3, '财务管理制度', '财务管理制度.pdf', '/uploads/regulations/财务管理制度.pdf', 3355443, 1, '2024-01-13 09:15:00', 'admin', '2024-01-13 09:15:00', 'admin', '2024-01-13 09:15:00', b'0', 1);
+INSERT INTO `system_regulation` (`id`, `title`, `file_name`, `file_url`, `file_size`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (4, '人事管理制度', '人事管理制度.pdf', '/uploads/regulations/人事管理制度.pdf', 2202009, 1, '2024-01-12 16:45:00', 'admin', '2024-01-12 16:45:00', 'admin', '2024-01-12 16:45:00', b'0', 1);
+INSERT INTO `system_regulation` (`id`, `title`, `file_name`, `file_url`, `file_size`, `status`, `publish_time`, `creator`, `create_time`, `updater`, `update_time`, `deleted`, `tenant_id`) VALUES (5, '保密制度', '保密制度.pdf', '/uploads/regulations/保密制度.pdf', 1572864, 1, '2024-01-11 11:20:00', 'admin', '2024-01-11 11:20:00', 'admin', '2024-01-11 11:20:00', b'0', 1);
+COMMIT;
+
+-- ----------------------------
 -- Table structure for system_notify_message
 -- ----------------------------
 DROP TABLE IF EXISTS `system_notify_message`;

@@ -14,13 +14,12 @@ const currentSize = computed(() => appStore.getCurrentSize)
 const greyMode = computed(() => appStore.getGreyMode)
 const { wsCache } = useCache()
 
-// 根据浏览器当前主题设置系统主题色
+// 强制使用亮色主题，禁用暗色主题
 const setDefaultTheme = () => {
-  let isDarkTheme = wsCache.get(CACHE_KEY.IS_DARK)
-  if (isDarkTheme === null) {
-    isDarkTheme = isDark()
-  }
-  appStore.setIsDark(isDarkTheme)
+  // 清除任何暗色主题的缓存
+  wsCache.delete(CACHE_KEY.IS_DARK)
+  // 强制设置为亮色主题
+  appStore.setIsDark(false)
 }
 setDefaultTheme()
 </script>

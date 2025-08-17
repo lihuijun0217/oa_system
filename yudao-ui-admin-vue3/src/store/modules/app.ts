@@ -247,15 +247,11 @@ export const useAppStore = defineStore('app', {
       this.title = title
     },
     setIsDark(isDark: boolean) {
-      this.isDark = isDark
-      if (this.isDark) {
-        document.documentElement.classList.add('dark')
-        document.documentElement.classList.remove('light')
-      } else {
-        document.documentElement.classList.add('light')
-        document.documentElement.classList.remove('dark')
-      }
-      wsCache.set(CACHE_KEY.IS_DARK, this.isDark)
+      // 强制使用亮色主题，忽略传入的参数
+      this.isDark = false
+      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add('light')
+      wsCache.set(CACHE_KEY.IS_DARK, false)
     },
     setCurrentSize(currentSize: ElementPlusSize) {
       this.currentSize = currentSize

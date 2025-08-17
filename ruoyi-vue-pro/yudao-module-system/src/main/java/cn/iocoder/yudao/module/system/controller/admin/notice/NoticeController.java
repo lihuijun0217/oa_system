@@ -62,7 +62,7 @@ public class NoticeController {
 
     @GetMapping("/page")
     @Operation(summary = "获取通知公告列表")
-    @PreAuthorize("@ss.hasPermission('system:notice:query')")
+//    @PreAuthorize("@ss.hasPermission('system:notice:query')")
     public CommonResult<PageResult<NoticeRespVO>> getNoticePage(@Validated NoticePageReqVO pageReqVO) {
         PageResult<NoticeDO> pageResult = noticeService.getNoticePage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, NoticeRespVO.class));
@@ -71,7 +71,7 @@ public class NoticeController {
     @GetMapping("/get")
     @Operation(summary = "获得通知公告")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:notice:query')")
+//    @PreAuthorize("@ss.hasPermission('system:notice:query')")
     public CommonResult<NoticeRespVO> getNotice(@RequestParam("id") Long id) {
         NoticeDO notice = noticeService.getNotice(id);
         return success(BeanUtils.toBean(notice, NoticeRespVO.class));

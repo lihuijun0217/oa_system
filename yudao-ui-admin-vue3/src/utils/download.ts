@@ -1,100 +1,165 @@
-const download0 = (data: Blob, fileName: string, mineType: string) => {
-  // 创建 blob
-  const blob = new Blob([data], { type: mineType })
-  // 创建 href 超链接，点击进行下载
-  window.URL = window.URL || window.webkitURL
-  const href = URL.createObjectURL(blob)
-  const downA = document.createElement('a')
-  downA.href = href
-  downA.download = fileName
-  downA.click()
-  // 销毁超连接
-  window.URL.revokeObjectURL(href)
+import request from '@/config/axios'
+
+/**
+ * 通用文件下载工具函数
+ * @param fileUrl 文件URL
+ * @param fileName 文件名
+ * @param target 目标窗口（默认为_blank）
+ */
+export const downloadFile = async (fileUrl: string, fileName?: string, target: string = '_blank') => {
+  if (!fileUrl) {
+    console.error('文件URL不能为空')
+    return
+  }
+
+  try {
+    // 使用后端API下载文件，避免MinIO重定向问题
+    const response = await request.download({ url: fileUrl })
+    
+    // 创建blob URL
+    const blob = new Blob([response])
+    const blobUrl = window.URL.createObjectURL(blob)
+    
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = fileName || 'download'
+    link.target = target
+    link.style.display = 'none'
+    
+    // 添加到DOM并触发点击
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理DOM和blob URL
+    setTimeout(() => {
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    }, 100)
+  } catch (error) {
+    console.error('文件下载失败:', error)
+    throw error
+  }
 }
 
-const download = {
-  // 下载 Excel 方法
-  excel: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'application/vnd.ms-excel')
-  },
-  // 下载 Word 方法
-  word: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'application/msword')
-  },
-  // 下载 Zip 方法
-  zip: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'application/zip')
-  },
-  // 下载 Html 方法
-  html: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'text/html')
-  },
-  // 下载 Markdown 方法
-  markdown: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'text/markdown')
-  },
-  // 下载 Json 方法
-  json: (data: Blob, fileName: string) => {
-    download0(data, fileName, 'application/json')
-  },
-  // 下载图片（允许跨域）
-  image: ({
-    url,
-    canvasWidth,
-    canvasHeight,
-    drawWithImageSize = true
-  }: {
-    url: string
-    canvasWidth?: number // 指定画布宽度
-    canvasHeight?: number // 指定画布高度
-    drawWithImageSize?: boolean // 将图片绘制在画布上时带上图片的宽高值, 默认是要带上的
-  }) => {
-    const image = new Image()
-    // image.setAttribute('crossOrigin', 'anonymous')
-    image.src = url
-    image.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = canvasWidth || image.width
-      canvas.height = canvasHeight || image.height
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-      ctx?.clearRect(0, 0, canvas.width, canvas.height)
-      if (drawWithImageSize) {
-        ctx.drawImage(image, 0, 0, image.width, image.height)
-      } else {
-        ctx.drawImage(image, 0, 0)
-      }
-      const url = canvas.toDataURL('image/png')
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'image.png'
-      a.click()
-    }
-  },
-  base64ToFile: (base64: any, fileName: string) => {
-    // 将base64按照 , 进行分割 将前缀  与后续内容分隔开
-    const data = base64.split(',')
-    // 利用正则表达式 从前缀中获取图片的类型信息（image/png、image/jpeg、image/webp等）
-    const type = data[0].match(/:(.*?);/)[1]
-    // 从图片的类型信息中 获取具体的文件格式后缀（png、jpeg、webp）
-    const suffix = type.split('/')[1]
-    // 使用atob()对base64数据进行解码  结果是一个文件数据流 以字符串的格式输出
-    const bstr = window.atob(data[1])
-    // 获取解码结果字符串的长度
-    let n = bstr.length
-    // 根据解码结果字符串的长度创建一个等长的整形数字数组
-    // 但在创建时 所有元素初始值都为 0
-    const u8arr = new Uint8Array(n)
-    // 将整形数组的每个元素填充为解码结果字符串对应位置字符的UTF-16 编码单元
-    while (n--) {
-      // charCodeAt()：获取给定索引处字符对应的 UTF-16 代码单元
-      u8arr[n] = bstr.charCodeAt(n)
-    }
-
-    // 将File文件对象返回给方法的调用者
-    return new File([u8arr], `${fileName}.${suffix}`, {
-      type: type
-    })
+/**
+ * 下载规章制度文件
+ * @param id 规章制度ID
+ * @param fileName 文件名（可选，如果不传则使用规章制度标题）
+ */
+export const downloadRegulationFile = async (id: number, fileName?: string) => {
+  if (!id) {
+    console.error('规章制度ID不能为空')
+    return
   }
+
+  try {
+    // 使用规章制度下载API，后端会自动使用规章制度标题作为文件名
+    const response = await request.download({ url: `/system/regulation/download?id=${id}` })
+    
+    // 创建blob URL
+    const blob = new Blob([response])
+    const blobUrl = window.URL.createObjectURL(blob)
+    
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = blobUrl
+    // 如果传入了fileName则使用，否则使用默认名称（后端会设置正确的文件名）
+    link.download = fileName || 'regulation'
+    link.style.display = 'none'
+    
+    // 添加到DOM并触发点击
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理DOM和blob URL
+    setTimeout(() => {
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    }, 100)
+  } catch (error) {
+    console.error('规章制度文件下载失败:', error)
+    throw error
+  }
+}
+
+/**
+ * 检查URL是否是Office Online预览链接
+ * @param url 要检查的URL
+ * @returns 是否是Office Online预览链接
+ */
+export const isOfficeOnlineUrl = (url: string): boolean => {
+  return url.includes('view.officeapps.live.com')
+}
+
+/**
+ * 从Office Online预览链接中提取原始文件URL
+ * @param url Office Online预览链接
+ * @returns 原始文件URL
+ */
+export const extractOriginalUrl = (url: string): string => {
+  if (!isOfficeOnlineUrl(url)) {
+    return url
+  }
+
+  try {
+    const urlParams = new URL(url)
+    const srcParam = urlParams.searchParams.get('src')
+    if (srcParam) {
+      return decodeURIComponent(srcParam)
+    }
+  } catch (error) {
+    console.error('解析Office Online链接失败:', error)
+  }
+
+  return url
+}
+
+/**
+ * 下载图片
+ * @param url 图片URL
+ * @param fileName 文件名（可选）
+ */
+export const downloadImage = async (url: string, fileName?: string) => {
+  if (!url) {
+    console.error('图片URL不能为空')
+    return
+  }
+
+  try {
+    // 使用fetch获取图片数据
+    const response = await fetch(url)
+    const blob = await response.blob()
+    
+    // 创建blob URL
+    const blobUrl = window.URL.createObjectURL(blob)
+    
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = fileName || `image_${Date.now()}.png`
+    link.style.display = 'none'
+    
+    // 添加到DOM并触发点击
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理DOM和blob URL
+    setTimeout(() => {
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    }, 100)
+  } catch (error) {
+    console.error('图片下载失败:', error)
+    throw error
+  }
+}
+
+// 保持向后兼容的默认导出
+const download = {
+  image: downloadImage,
+  file: downloadFile,
+  regulation: downloadRegulationFile
 }
 
 export default download

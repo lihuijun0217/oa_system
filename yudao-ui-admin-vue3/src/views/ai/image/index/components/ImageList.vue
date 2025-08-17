@@ -150,7 +150,7 @@ const handleImageButtonClick = async (type: string, imageDetail: ImageVO) => {
   }
   // 下载
   if (type === 'download') {
-    await download.image({ url: imageDetail.picUrl })
+    await download.image(imageDetail.picUrl)
     return
   }
   // 重新生成

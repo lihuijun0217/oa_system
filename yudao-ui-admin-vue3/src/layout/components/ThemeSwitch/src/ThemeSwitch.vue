@@ -2,6 +2,7 @@
 import { useAppStore } from '@/store/modules/app'
 import { useIcon } from '@/hooks/web/useIcon'
 import { useDesign } from '@/hooks/web/useDesign'
+import { ElMessage } from 'element-plus'
 
 defineOptions({ name: 'ThemeSwitch' })
 
@@ -22,7 +23,9 @@ const isDark = ref(appStore.getIsDark)
 const blackColor = 'var(--el-color-black)'
 
 const themeChange = (val: boolean) => {
-  appStore.setIsDark(val)
+  // 禁用主题切换，强制使用亮色主题
+  appStore.setIsDark(false)
+  ElMessage.info('系统已禁用暗色主题，仅支持亮色主题')
 }
 </script>
 
