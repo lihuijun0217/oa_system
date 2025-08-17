@@ -43,29 +43,88 @@ export const downloadFile = async (fileUrl: string, fileName?: string, target: s
 }
 
 /**
+ * 从URL中提取文件名和扩展名
+ * @param url 文件URL
+ * @returns 文件名（包含扩展名）
+ */
+const extractFileNameFromUrl = (url: string): string => {
+  try {
+    // 处理MinIO URL的特殊情况
+    let processedUrl = url
+    
+    // 如果是Office Online预览链接，先提取原始URL
+    if (url.includes('view.officeapps.live.com')) {
+      const urlParams = new URL(url)
+      const srcParam = urlParams.searchParams.get('src')
+      if (srcParam) {
+        processedUrl = decodeURIComponent(srcParam)
+      }
+    }
+    
+    // 从URL中提取文件名
+    const urlObj = new URL(processedUrl)
+    const pathname = urlObj.pathname
+    
+    // 分割路径并获取最后一个非空部分
+    const pathParts = pathname.split('/').filter(part => part.length > 0)
+    const fileName = pathParts[pathParts.length - 1] || ''
+    
+    // 如果文件名包含查询参数，去掉查询参数
+    const cleanFileName = fileName.split('?')[0]
+    
+    // 如果文件名为空或没有扩展名，返回默认名称
+    if (!cleanFileName || !cleanFileName.includes('.')) {
+      return 'regulation.txt'
+    }
+    
+    // 解码URL编码的文件名
+    const decodedFileName = decodeURIComponent(cleanFileName)
+    
+    // 确保文件名不为空
+    if (!decodedFileName || decodedFileName.trim() === '') {
+      return 'regulation.txt'
+    }
+    
+    return decodedFileName
+  } catch (error) {
+    console.error('从URL提取文件名失败:', error)
+    return 'regulation.txt'
+  }
+}
+
+/**
  * 下载规章制度文件
  * @param id 规章制度ID
- * @param fileName 文件名（可选，如果不传则使用规章制度标题）
+ * @param fileName 文件名（可选，如果不传则从后端获取）
+ * @param fileUrl 文件URL（可选，用于提取文件名）
  */
-export const downloadRegulationFile = async (id: number, fileName?: string) => {
+export const downloadRegulationFile = async (id: number, fileName?: string, fileUrl?: string) => {
   if (!id) {
     console.error('规章制度ID不能为空')
     return
   }
 
   try {
-    // 使用规章制度下载API，后端会自动使用规章制度标题作为文件名
+    // 使用规章制度下载API
     const response = await request.download({ url: `/system/regulation/download?id=${id}` })
     
     // 创建blob URL
     const blob = new Blob([response])
     const blobUrl = window.URL.createObjectURL(blob)
     
+    // 确定下载文件名
+    let downloadFileName = fileName
+    if (!downloadFileName && fileUrl) {
+      downloadFileName = extractFileNameFromUrl(fileUrl)
+    }
+    if (!downloadFileName) {
+      downloadFileName = 'regulation.txt'
+    }
+    
     // 创建下载链接
     const link = document.createElement('a')
     link.href = blobUrl
-    // 如果传入了fileName则使用，否则使用默认名称（后端会设置正确的文件名）
-    link.download = fileName || 'regulation'
+    link.download = downloadFileName
     link.style.display = 'none'
     
     // 添加到DOM并触发点击

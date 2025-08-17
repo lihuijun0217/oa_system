@@ -462,7 +462,7 @@ const handleRegulationClick = async (item: any) => {
     
     // 用户确认后，使用下载工具函数
     if (item.id) {
-      await downloadRegulationFile(item.id)
+      await downloadRegulationFile(item.id, item.fileName, item.fileUrl)
       ElMessage.success('文件下载已开始')
     } else {
       ElMessage.error('文件信息不完整，无法下载')

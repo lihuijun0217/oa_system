@@ -17,6 +17,8 @@
           :file-size="10"
           :limit="1"
           directory="regulation"
+          @success="handleFileUploadSuccess"
+          @update:modelValue="handleFileUrlChange"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -57,11 +59,30 @@ const formData = ref({
 const formRules = reactive({
   title: [{ required: true, message: '规章制度标题不能为空', trigger: 'blur' }],
   fileUrl: [{ required: true, message: '请选择文件', trigger: 'change' }],
+  fileName: [{ required: true, message: '文件名不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
+/** 文件上传成功处理 */
+const handleFileUploadSuccess = (fileUrl: string) => {
+  // 从文件URL中提取文件名
+  if (fileUrl) {
+    const fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1)
+    formData.value.fileName = fileName
+    // 如果标题为空，使用文件名作为标题
+    if (!formData.value.title) {
+      formData.value.title = fileName.substring(0, fileName.lastIndexOf('.')) || fileName
+    }
+  }
+}
 
+/** 文件URL变化处理 */
+const handleFileUrlChange = (fileUrl: string) => {
+  if (!fileUrl) {
+    formData.value.fileName = ''
+  }
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -121,6 +142,5 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
-
 
 </script> 

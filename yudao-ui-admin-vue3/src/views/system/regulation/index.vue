@@ -222,7 +222,7 @@ const handleUnpublish = async (id: number) => {
 /** 下载文件 */
 const handleDownload = async (row: any) => {
   try {
-    await downloadRegulationFile(row.id)
+    await downloadRegulationFile(row.id, row.fileName, row.fileUrl)
     message.success('文件下载已开始')
   } catch (error) {
     message.error('文件下载失败，请重试')

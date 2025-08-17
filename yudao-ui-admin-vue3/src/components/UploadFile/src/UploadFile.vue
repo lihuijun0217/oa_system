@@ -76,7 +76,7 @@ import { UploadFile } from 'element-plus/es/components/upload/src/upload'
 defineOptions({ name: 'UploadFile' })
 
 const message = useMessage() // 消息弹窗
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'success'])
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
@@ -140,6 +140,8 @@ const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
     uploadList.value = []
     uploadNumber.value = 0
     emitUpdateModelValue()
+    // 触发成功事件
+    emit('success', res.data)
   }
 }
 // 文件数超出提示
