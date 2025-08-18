@@ -83,6 +83,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/company',
+    component: Layout,
+    name: 'Company',
+    meta: {
+      title: '公司首页',
+      icon: 'ep:office-building',
+      noCache: false,
+      affix: false
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/Company/Index.vue'),
+        name: 'CompanyIndex',
+        meta: {
+          title: '公司首页',
+          icon: 'ep:office-building',
+          noCache: false,
+          affix: false
+        }
+      }
+    ]
+  },
+  {
     path: '/user',
     component: Layout,
     name: 'UserInfo',

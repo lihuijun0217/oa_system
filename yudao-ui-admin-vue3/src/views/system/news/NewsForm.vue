@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="1000px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -26,12 +26,7 @@
         />
       </el-form-item>
       <el-form-item label="新闻内容" prop="content">
-        <el-input
-          v-model="formData.content"
-          type="textarea"
-          :rows="8"
-          placeholder="请输入新闻内容"
-        />
+        <Editor v-model="formData.content" :height="400" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -50,6 +45,7 @@
 <script lang="ts" setup>
 import * as NewsApi from '@/api/system/news'
 import { UploadImg } from '@/components/UploadFile'
+import { Editor } from '@/components/Editor'
 
 defineOptions({ name: 'NewsForm' })
 
@@ -75,6 +71,20 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 富文本编辑器如果输入过再清空会有残留，需再重置一次 */
+watch(
+  () => formData.value.content,
+  (newValue) => {
+    if ('<p><br></p>' === newValue) {
+      formData.value.content = ''
+    }
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

@@ -147,15 +147,20 @@
   <Dialog v-model="newsDetailVisible" title="新闻详情" width="50%">
     <el-descriptions :column="1" border v-loading="newsDetailLoading">
       <el-descriptions-item label="新闻标题">{{ newsDetail.title }}</el-descriptions-item>
-      <el-descriptions-item label="新闻类型">
+      <el-descriptions-item label="新闻图片" v-if="newsDetail.imageUrl">
+        <div class="news-image-container">
+          <img :src="newsDetail.imageUrl" :alt="newsDetail.title" class="news-detail-image" />
+        </div>
+      </el-descriptions-item>
+      <!-- <el-descriptions-item label="新闻类型">
         <el-tag :type="newsDetail.type === 1 ? 'primary' : 'success'">
           {{ newsDetail.type === 1 ? '图片新闻' : '文字新闻' }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="状态">
         <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="newsDetail.status" />
-      </el-descriptions-item>
-      <el-descriptions-item label="创建时间">{{ dateFormatter(newsDetail.createTime) }}</el-descriptions-item>
+      </el-descriptions-item> -->
+      <!-- <el-descriptions-item label="创建时间">{{ dateFormatter(newsDetail.createTime) }}</el-descriptions-item> -->
       <el-descriptions-item label="新闻内容">
         <div v-html="newsDetail.content"></div>
       </el-descriptions-item>
@@ -1184,5 +1189,47 @@ onMounted(() => {
 
 .cursor-pointer :deep(tbody tr:hover) {
   background-color: #f5f7fa;
+}
+
+/* 新闻详情图片样式 */
+.news-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.news-detail-image {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.news-detail-image:hover {
+  transform: scale(1.02);
+}
+
+/* 强制设置描述列表标签宽度 */
+:deep(.el-descriptions__cell) {
+  /* display: flex; */
+  align-items: center;
+  justify-content: space-between;
+}
+
+:deep(.el-descriptions__label) {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  /* display: block; */
+  text-align: left;
+  flex-shrink: 0 !important;
+}
+
+:deep(.el-descriptions__content) {
+  flex: 1;
+  text-align: left;
 }
 </style>
