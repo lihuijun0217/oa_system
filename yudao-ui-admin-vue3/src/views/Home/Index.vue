@@ -42,7 +42,7 @@
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/system/notice')">更多</el-link>
           </div>
         </template>
-        <div class="card-body">
+        <div class="card-body pt-0">
           <ul class="notice-list">
             <li v-for="item in noticeList" :key="item.id" class="notice-item" @click="handleNoticeClick(item)">
               <span class="notice-title">{{ item.title }}</span>
@@ -54,49 +54,50 @@
     </div>
 
     <!-- 第二行：待办任务、规章制度、流程待办/已办/我的 -->
-    <div class="block block-2" style="height: 280px;">
-      <!-- 待办任务 -->
-      <el-card class="card todo-card">
-        <template #header>
-          <div class="card-header">
-            <span>待办任务</span>
-            <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">更多</el-link>
+    <div class="block block-1" style="height: 360px;">
+      <div class="block block-4">
+        <!-- 待办任务 -->
+        <el-card class="card todo-card">
+          <template #header>
+            <div class="card-header">
+              <span>待办任务</span>
+              <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/todo')">更多</el-link>
+            </div>
+          </template>
+          <div class="card-body pt-0">
+            <div v-if="todoTasks && todoTasks.length > 0">
+              <el-table :data="todoTasks" stripe @row-click="handleTodoTaskClick" class="cursor-pointer">
+                <el-table-column label="流程名称" min-width="200" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ row.processInstance?.name || row.processInstanceId }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="name" label="任务名称" show-overflow-tooltip />
+                <!-- <el-table-column prop="createTime" label="创建时间" :formatter="(row) => dateFormatter(row.createTime)" /> -->
+              </el-table>
+            </div>
+            <el-empty v-else description="暂无待办任务" />
           </div>
-        </template>
-        <div class="card-body">
-          <div v-if="todoTasks && todoTasks.length > 0">
-            <el-table :data="todoTasks" stripe @row-click="handleTodoTaskClick" class="cursor-pointer">
-              <el-table-column label="流程名称" min-width="200" show-overflow-tooltip>
-                <template #default="{ row }">
-                  {{ row.processInstance?.name || row.processInstanceId }}
-                </template>
-              </el-table-column>
-              <el-table-column prop="name" label="任务名称" show-overflow-tooltip />
-              <!-- <el-table-column prop="createTime" label="创建时间" :formatter="(row) => dateFormatter(row.createTime)" /> -->
-            </el-table>
-          </div>
-          <el-empty v-else description="暂无待办任务" />
-        </div>
-      </el-card>
+        </el-card>
 
-      <!-- 规章制度 -->
-      <el-card class="card regulation-card">
-        <template #header>
-          <div class="card-header">
-            <span>规章制度</span>
-            <el-link type="primary" :underline="false" @click="handleShortcutClick('/system/regulation')">更多</el-link>
+        <!-- 规章制度 -->
+        <el-card class="card regulation-card">
+          <template #header>
+            <div class="card-header">
+              <span>规章制度</span>
+              <el-link type="primary" :underline="false" @click="handleShortcutClick('/system/regulation')">更多</el-link>
+            </div>
+          </template>
+          <div class="card-body pt-0">
+            <ul class="regulation-list">
+              <li v-for="item in regulationList" :key="item.id" class="regulation-item" @click="handleRegulationClick(item)">
+                <span class="regulation-title">{{ item.title }}</span>
+                <span class="regulation-date">{{ item.createTime }}</span>
+              </li>
+            </ul>
           </div>
-        </template>
-        <div class="card-body">
-          <ul class="regulation-list">
-            <li v-for="item in regulationList" :key="item.id" class="regulation-item" @click="handleRegulationClick(item)">
-              <span class="regulation-title">{{ item.title }}</span>
-              <span class="regulation-date">{{ item.createTime }}</span>
-            </li>
-          </ul>
-        </div>
-      </el-card>
-
+        </el-card>
+      </div>
       <!-- 流程待办/已办/我的 -->
       <el-card class="card process-card">
         <template #header>
@@ -490,9 +491,7 @@ onMounted(() => {
 
 <style scoped>
 .home-index {
-  padding: 24px;
-  padding-right: 0;
-  padding-bottom: 100px; /* 为底部栏留出足够空间 */
+  padding-bottom: 2px; /* 为底部栏留出足够空间 */
   box-sizing: border-box;
 }
 .block-1 {
@@ -506,6 +505,13 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 24px;
+  margin-bottom: 24px;
+}
+.block-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  height: 100%;
   margin-bottom: 24px;
 }
 
@@ -696,6 +702,9 @@ onMounted(() => {
 
 .card-body {
   padding: 12px;
+}
+.pt-0{
+  padding-top: 0;
 }
 
 /* 通知公告 */
@@ -1059,8 +1068,8 @@ onMounted(() => {
   list-style: none;
   padding: 0;
   margin: 0;
-  height: 180px;
-  overflow-y: auto;
+ /* height: 180px;
+  overflow-y: auto;*/
 }
 
 .regulation-item {
