@@ -375,6 +375,30 @@ $process-header-height: 105px;
     );
     overflow: auto;
   }
+  :deep(.fc-form-item) {
+    .el-textarea__inner{
+      min-height: 60px!important;
+    }
+  }
+  // 签名字段图片样式设置
+   :deep(.el-col-24 + div) {
+     img[id$="_img"]{
+      height: 38px !important;
+      margin-top: 10px!important;
+    }
+     
+   }
+  :deep(.el-form-item__content){
+   .el-date-editor {
+      padding-right: 0!important;
+      height: 38px;
+      line-height: 36px;
+      margin-top: 10px!important;
+      margin-left:10!important;
+   }
+   
+   
+  }
 }
 
 .form-box {
