@@ -102,7 +102,7 @@
       <el-card class="card process-card">
         <template #header>
           <div class="card-header">
-            <span>当前的待办</span>
+            <span>快捷入口</span>
             <el-link type="primary" :underline="false" @click="handleShortcutClick('/bpm/task/my')">更多</el-link>
           </div>
         </template>
